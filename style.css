@@ -1,15 +1,11 @@
 /*
-Theme Name: Nordhouse
-Theme URI: https://nordhouse.studio
-Author: Nordhouse Studio
-Author URI: https://nordhouse.studio
-Description: Custom single-page theme for Nordhouse — a digital product studio. Built section-by-section as custom Elementor widgets. No template, no page builder theme, no third-party UI kit.
+Theme Name: Nexus Agency
+Theme URI: https://example.com/nexus
+Author: Custom Studio
+Description: A bespoke, ultra-clean theme designed for custom Elementor widget integration without bloat.
 Version: 1.0.0
 Requires at least: 6.0
-Requires PHP: 7.4
-Text Domain: nordhouse
+Tested up to: 6.6
+Requires PHP: 8.0
+Text Domain: nexus-agency
 */
-
-/* Intentionally empty beyond this header.
-   All real styling lives in assets/css/main.css — this file exists
-   only because WordPress requires it to register the theme. */

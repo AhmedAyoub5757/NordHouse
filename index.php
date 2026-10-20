@@ -1,28 +1,20 @@
 <?php
 /**
- * Fallback template.
- * This is a single-page Elementor build — the real markup for the front
- * page comes from Elementor's own content output (widgets render inside
- * the_content). This file stays deliberately minimal: a shell + content.
- *
- * @package Nordhouse
+ * Main Template File (Canvas Style for Elementor Single Page)
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
-get_header();
+get_header(); 
 ?>
 
-<main id="nordhouse-main" class="nordhouse-main">
+<main id="primary" class="site-main">
 	<?php
-	while ( have_posts() ) :
-		the_post();
-		the_content();
-	endwhile;
+	if ( have_posts() ) :
+		while ( have_posts() ) :
+			the_post();
+			the_content();
+		endwhile;
+	endif;
 	?>
 </main>
 
-<?php
+<?php 
 get_footer();
