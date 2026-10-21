@@ -1,24 +1,400 @@
-/* Reset & Base Variables */
+/* =========================================
+   Matcha Launch — Main Stylesheet
+   Structure: tokens -> reset -> base -> utilities
+   Section-specific styles live alongside each
+   widget's own CSS partial once we build them
+   (or appended here, your call per section).
+   ========================================= */
+
+/* ---- Design tokens ---- */
 :root {
-    --bg-dark: #0A0A0C;
-    --text-primary: #ECECEC;
-    --text-muted: #88888E;
-    --accent-color: #E2FF54; /* Electric Lime/Lemon Accent */
-    --font-heading: system-ui, -apple-system, sans-serif;
-    --font-body: system-ui, -apple-system, sans-serif;
+	--color-bg: #faf8f3;
+	--color-text: #1a1a1a;
+
+	--font-base: 100%;
+	--container-width: 1200px;
+	--gutter: clamp(1.25rem, 4vw, 3rem);
 }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+/* ---- Reset ---- */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	scroll-behavior: smooth;
 }
 
 body {
-    background-color: var(--bg-dark);
-    color: var(--text-primary);
-    font-family: var(--font-body);
-    line-height: 1.6;
-    overflow-x: hidden;
-    -webkit-font-smoothing: antialiased;
+	margin: 0;
+	background: var(--color-bg);
+	color: var(--color-text);
+	-webkit-font-smoothing: antialiased;
 }
+
+img, svg, video {
+	max-width: 100%;
+	display: block;
+}
+
+a {
+	text-decoration: none;
+	color: inherit;
+}
+
+button {
+	font: inherit;
+	cursor: pointer;
+	border: none;
+	background: none;
+}
+
+/* ---- Layout utility ---- */
+.matcha-container {
+	max-width: var(--container-width);
+	margin-inline: auto;
+	padding-inline: var(--gutter);
+}
+
+.matcha-section {
+	position: relative;
+	width: 100%;
+}
+
+/* ---- Section-specific styles appended below as we build ---- */
+
+/* =========================================
+   Navbar — "The Bloom"
+   ========================================= */
+
+:root {
+	--bloom-ink: #161a12;
+	--bloom-cream: #f3efe2;
+	--color-primary: #3f5436;
+	--color-primary-dark: #2a3824;
+	--color-surface: #ffffff;
+	--color-ink: #1c1c1a;
+	--trigger-size: 64px;
+}
+
+.matcha-bloomnav {
+	position: fixed;
+	inset: 0;
+	width: 100%;
+	height: 0;
+	z-index: 999;
+	pointer-events: none;
+}
+
+.matcha-bloomnav * {
+	pointer-events: auto;
+}
+
+/* ---- Logo ---- */
+.matcha-bloomnav__logo {
+	position: fixed;
+	top: 2rem;
+	left: 2rem;
+	font-weight: 600;
+	font-size: 1.15rem;
+	letter-spacing: -.02em;
+	color: var(--color-ink);
+	z-index: 1001;
+	transition: opacity .4s ease, transform .4s ease;
+}
+
+.matcha-bloomnav__logo img {
+	height: 30px;
+	width: auto;
+	display: block;
+}
+
+.matcha-bloomnav.is-open .matcha-bloomnav__logo {
+	opacity: 0;
+	transform: translateY(-8px);
+	pointer-events: none;
+}
+
+/* ---- Trigger ---- */
+.matcha-bloomnav__trigger {
+	position: fixed;
+	top: 2rem;
+	width: var(--trigger-size);
+	height: var(--trigger-size);
+	border-radius: 50%;
+	background: var(--color-surface);
+	box-shadow: 0 10px 30px -12px rgba(0,0,0,.3);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1002;
+	cursor: pointer;
+	transition: background-color .4s ease, transform .3s ease;
+}
+
+.matcha-bloomnav__trigger--right { right: 2rem; }
+.matcha-bloomnav__trigger--left { left: 2rem; }
+
+.matcha-bloomnav__trigger:hover {
+	transform: scale(1.06);
+}
+
+.matcha-bloomnav.is-open .matcha-bloomnav__trigger {
+	background: var(--bloom-cream);
+}
+
+/* progress ring */
+.matcha-bloomnav__ring {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	transform: rotate(-90deg);
+}
+
+.matcha-bloomnav__ring-track {
+	fill: none;
+	stroke: rgba(0,0,0,.08);
+	stroke-width: 2;
+}
+
+.matcha-bloomnav__ring-progress {
+	fill: none;
+	stroke: var(--color-primary);
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-dasharray: 182.2; /* 2 * PI * 29 */
+	stroke-dashoffset: 182.2;
+	transition: stroke-dashoffset .1s linear;
+}
+
+.matcha-bloomnav.is-open .matcha-bloomnav__ring-progress {
+	opacity: 0;
+}
+
+/* icon: two lines -> X */
+.matcha-bloomnav__trigger-icon {
+	position: relative;
+	width: 16px;
+	height: 12px;
+	display: none;
+}
+
+.matcha-bloomnav__trigger-icon span {
+	position: absolute;
+	left: 0;
+	width: 100%;
+	height: 2px;
+	background: var(--color-ink);
+	border-radius: 2px;
+	transition: transform .4s cubic-bezier(.65,0,.35,1), top .4s ease;
+}
+
+.matcha-bloomnav__trigger-icon span:nth-child(1) { top: 0; }
+.matcha-bloomnav__trigger-icon span:nth-child(2) { top: 10px; }
+
+.matcha-bloomnav.is-open .matcha-bloomnav__trigger-icon span:nth-child(1) {
+	top: 5px;
+	transform: rotate(45deg);
+}
+.matcha-bloomnav.is-open .matcha-bloomnav__trigger-icon span:nth-child(2) {
+	top: 5px;
+	transform: rotate(-45deg);
+}
+
+/* label under/over the dot */
+.matcha-bloomnav__trigger-label {
+	position: absolute;
+	bottom: -1.6rem;
+	font-size: .7rem;
+	letter-spacing: .08em;
+	text-transform: uppercase;
+	color: var(--color-ink);
+	white-space: nowrap;
+}
+
+.matcha-bloomnav__trigger-label .is-open-label { display: none; }
+.matcha-bloomnav.is-open .matcha-bloomnav__trigger-label .is-closed-label { display: none; }
+.matcha-bloomnav.is-open .matcha-bloomnav__trigger-label .is-open-label { display: inline; }
+
+/* ---- Overlay (the bloom) ---- */
+.matcha-bloomnav__overlay {
+	position: fixed;
+	inset: 0;
+	background: var(--bloom-ink);
+	clip-path: circle(0% at var(--origin-x, 100%) var(--origin-y, 0%));
+	-webkit-clip-path: circle(0% at var(--origin-x, 100%) var(--origin-y, 0%));
+	transition: clip-path .9s cubic-bezier(.76,0,.24,1);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	z-index: 1000;
+	visibility: hidden;
+}
+
+.matcha-bloomnav.is-open .matcha-bloomnav__overlay {
+	clip-path: circle(150% at var(--origin-x, 100%) var(--origin-y, 0%));
+	-webkit-clip-path: circle(150% at var(--origin-x, 100%) var(--origin-y, 0%));
+	visibility: visible;
+}
+
+/* drifting leaf silhouettes */
+.matcha-bloomnav__leaves {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+}
+
+.matcha-bloomnav__leaves .leaf {
+	position: absolute;
+	fill: rgba(243,239,226,.04);
+	width: 38vw;
+	max-width: 480px;
+}
+
+.leaf--1 { top: -8%; right: -6%; animation: matchaDrift 22s ease-in-out infinite; }
+.leaf--2 { bottom: -12%; left: -10%; width: 44vw; max-width: 560px; animation: matchaDrift 28s ease-in-out infinite reverse; }
+.leaf--3 { top: 35%; left: 55%; width: 26vw; max-width: 360px; animation: matchaDrift 18s ease-in-out infinite; animation-delay: -4s; }
+
+@keyframes matchaDrift {
+	0%, 100% { transform: translate(0,0) rotate(0deg); }
+	50% { transform: translate(-2%, 3%) rotate(6deg); }
+}
+
+/* ---- Panel content ---- */
+.matcha-bloomnav__panel {
+	position: relative;
+	z-index: 2;
+	width: 100%;
+	max-width: 640px;
+	padding: 0 2rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 3.5rem;
+}
+
+.matcha-bloomnav__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: .25rem;
+}
+
+.matcha-bloomnav__list-item {
+	border-bottom: 1px solid rgba(243,239,226,.12);
+	overflow: hidden;
+}
+
+.matcha-bloomnav__list-link {
+	display: flex;
+	align-items: baseline;
+	gap: 1.25rem;
+	padding: 1.15rem .25rem;
+	opacity: 0;
+	transform: translateY(24px);
+}
+
+.matcha-bloomnav.is-open .matcha-bloomnav__list-link {
+	animation: matchaRise .6s cubic-bezier(.16,1,.3,1) forwards;
+	animation-delay: calc(var(--i) * .07s + .25s);
+}
+
+@keyframes matchaRise {
+	to { opacity: 1; transform: translateY(0); }
+}
+
+.matcha-bloomnav__num {
+	font-size: .85rem;
+	color: var(--color-primary);
+	font-weight: 600;
+	letter-spacing: .05em;
+}
+
+.matcha-bloomnav__label {
+	font-size: clamp(1.75rem, 4.5vw, 2.75rem);
+	font-weight: 500;
+	letter-spacing: -.02em;
+	color: var(--bloom-cream);
+	transition: transform .35s cubic-bezier(.65,0,.35,1), color .35s ease;
+}
+
+.matcha-bloomnav__list-link:hover .matcha-bloomnav__label {
+	transform: translateX(14px);
+	color: #fff;
+}
+
+.matcha-bloomnav__list-link:hover .matcha-bloomnav__num {
+	color: var(--bloom-cream);
+}
+
+/* CTA — distinct closing statement, not another list item */
+.matcha-bloomnav__cta {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: .6rem;
+	padding: 1rem 2.2rem;
+	border: 1px solid rgba(243,239,226,.35);
+	border-radius: 999px;
+	color: var(--bloom-cream);
+	font-size: .95rem;
+	font-weight: 600;
+	letter-spacing: .02em;
+	opacity: 0;
+	transform: translateY(16px);
+	transition: background-color .35s ease, color .35s ease, border-color .35s ease;
+}
+
+.matcha-bloomnav.is-open .matcha-bloomnav__cta {
+	animation: matchaRise .6s cubic-bezier(.16,1,.3,1) forwards;
+	animation-delay: .55s;
+}
+
+.matcha-bloomnav__cta:hover {
+	background: var(--bloom-cream);
+	color: var(--bloom-ink);
+	border-color: var(--bloom-cream);
+}
+
+/* lock scroll when open */
+.matcha-lock-scroll {
+	overflow: hidden;
+}
+
+/* =========================================
+   Responsive
+   ========================================= */
+@media (max-width: 767px) {
+	:root { --trigger-size: 56px; }
+
+	.matcha-bloomnav__logo { top: 1.25rem; left: 1.25rem; font-size: 1rem; }
+	.matcha-bloomnav__trigger--right { right: 1.25rem; top: 1.25rem; }
+	.matcha-bloomnav__trigger--left { left: 1.25rem; top: 1.25rem; }
+	.matcha-bloomnav__trigger-icon { display: flex; }
+
+	.matcha-bloomnav__panel { gap: 2.25rem; }
+	.matcha-bloomnav__label { font-size: clamp(1.5rem, 7vw, 2rem); }
+	.matcha-bloomnav__cta { width: 100%; justify-content: center; }
+}
+
+@media (min-width: 768px) {
+	.matcha-bloomnav__trigger-icon { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.matcha-bloomnav__overlay,
+	.matcha-bloomnav__list-link,
+	.matcha-bloomnav__cta,
+	.leaf {
+		animation: none !important;
+		transition: none !important;
+	}
+}
+

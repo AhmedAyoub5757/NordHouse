@@ -1,20 +1,22 @@
 <?php
 /**
- * Main Template File (Canvas Style for Elementor Single Page)
+ * Fallback template — the single-page build is assembled via Elementor
+ * on the front page, so this mostly just needs to exist.
  */
-get_header(); 
+
+if ( ! defined( 'ABSPATH' ) ) exit;
+
+get_header();
 ?>
 
-<main id="primary" class="site-main">
+<main id="main-content">
 	<?php
-	if ( have_posts() ) :
-		while ( have_posts() ) :
-			the_post();
-			the_content();
-		endwhile;
-	endif;
+	while ( have_posts() ) :
+		the_post();
+		the_content();
+	endwhile;
 	?>
 </main>
 
-<?php 
+<?php
 get_footer();
