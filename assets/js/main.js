@@ -1,89 +1,410 @@
-/**
- * Matcha Launch — Main JS
- * Lightweight, no framework. Each section can register
- * its own init function here as we build it.
- */
+document.addEventListener('DOMContentLoaded', () => {
+	console.log('Kinetic theme assets loaded.');
+});
 
-(function () {
-	'use strict';
+document.addEventListener('DOMContentLoaded', () => {
+	const trigger = document.getElementById('kNavTrigger');
+	const curtain = document.getElementById('kCurtainNav');
+	const taglineDisplay = document.getElementById('kNavHoverTagline');
+	const menuItems = document.querySelectorAll('.k-curtain-item');
+	const btnLabel = trigger ? trigger.querySelector('.k-btn-label') : null;
 
-	document.addEventListener('DOMContentLoaded', function () {
-		matchaInit();
-	});
+	let isOpen = false;
 
-	function matchaInit() {
-		// Section init calls get added here as widgets are built, e.g.
-        matchaNavbarInit();
-		// matchaHeroInit();
-		// matchaFlavorsInit();
+	if (trigger && curtain) {
+		trigger.addEventListener('click', () => {
+			isOpen = !isOpen;
+			
+			if (isOpen) {
+				curtain.classList.add('is-active');
+				trigger.classList.add('is-open');
+				if (btnLabel) btnLabel.textContent = 'CLOSE';
+				
+				// Enhanced GSAP Animations on curtain open
+				if (typeof gsap !== 'undefined') {
+					// Stagger reveal links with rotation shift
+					gsap.fromTo('.k-curtain-item', 
+						{ y: 80, opacity: 0, rotateX: -20 },
+						{ y: 0, opacity: 1, rotateX: 0, duration: 0.8, stagger: 0.1, ease: 'power4.out', delay: 0.3 }
+					);
+
+					// Stagger reveal footer info
+					gsap.fromTo('.k-footer-col',
+						{ y: 30, opacity: 0 },
+						{ y: 0, opacity: 1, duration: 0.6, stagger: 0.15, ease: 'power2.out', delay: 0.6 }
+					);
+				}
+			} else {
+				curtain.classList.remove('is-active');
+				trigger.classList.remove('is-open');
+				if (btnLabel) btnLabel.textContent = 'MENU';
+			}
+		});
+
+		// Dynamic hover tagline transition with GSAP text fade
+		menuItems.forEach(item => {
+			item.addEventListener('mouseenter', () => {
+				const tag = item.getAttribute('data-tagline');
+				if (taglineDisplay && tag) {
+					if (typeof gsap !== 'undefined') {
+						gsap.to(taglineDisplay, { opacity: 0, y: -5, duration: 0.15, onComplete: () => {
+							taglineDisplay.textContent = `// ${tag}`;
+							gsap.to(taglineDisplay, { opacity: 1, y: 0, duration: 0.25 });
+						}});
+					} else {
+						taglineDisplay.textContent = `// ${tag}`;
+					}
+				}
+			});
+
+			item.addEventListener('mouseleave', () => {
+				if (taglineDisplay) {
+					if (typeof gsap !== 'undefined') {
+						gsap.to(taglineDisplay, { opacity: 0, y: 5, duration: 0.15, onComplete: () => {
+							taglineDisplay.textContent = 'SELECT A DESTINATION';
+							gsap.to(taglineDisplay, { opacity: 1, y: 0, duration: 0.25 });
+						}});
+					} else {
+						taglineDisplay.textContent = 'SELECT A DESTINATION';
+					}
+				}
+			});
+
+			// Close curtain on link click
+			item.addEventListener('click', () => {
+				curtain.classList.remove('is-active');
+				trigger.classList.remove('is-open');
+				if (btnLabel) btnLabel.textContent = 'MENU';
+				isOpen = false;
+			});
+		});
 	}
+});
 
-})();
+document.addEventListener('DOMContentLoaded', () => {
+	const cols = document.querySelectorAll('.k-mono-col');
 
-function matchaNavbarInit() {
-	const root = document.getElementById('matchaBloomNav');
-	if (!root) return;
+	if (cols.length > 0) {
+		
+		// GSAP Sequential Appear Animation
+		if (typeof gsap !== 'undefined') {
+			const tl = gsap.timeline({ delay: 0.3 });
 
-	const trigger = document.getElementById('matchaBloomTrigger');
-	const overlay = document.getElementById('matchaBloomOverlay');
-	const ringProgress = document.getElementById('matchaRingProgress');
-	const navLinks = overlay ? overlay.querySelectorAll('[data-nav-link]') : [];
-	const CIRCUMFERENCE = 182.2; // 2 * PI * r(29)
-
-	/* ---- Scroll progress ring ---- */
-	let ticking = false;
-	function updateRing() {
-		const scrollTop = window.scrollY;
-		const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-		const pct = docHeight > 0 ? Math.min(scrollTop / docHeight, 1) : 0;
-		if (ringProgress) {
-			ringProgress.style.strokeDashoffset = CIRCUMFERENCE * (1 - pct);
+			// 1. Draw vertical column border lines down
+			tl.to('.k-col-border', {
+				height: '100%',
+				duration: 0.8,
+				stagger: 0.1,
+				ease: 'power3.inOut'
+			})
+			// 2. Pop in index numbers sequentially
+			.to('.k-col-num', {
+				y: 0,
+				opacity: 1,
+				duration: 0.5,
+				stagger: 0.08,
+				ease: 'power2.out'
+			}, '-=0.4')
+			// 3. Reveal vertical hollow titles
+			.to('.k-col-vertical-title', {
+				opacity: 1,
+				duration: 0.6,
+				stagger: 0.08,
+				ease: 'power3.out'
+			}, '-=0.3');
 		}
-		ticking = false;
+
+		// Column Expansion Logic
+		cols.forEach(col => {
+			// Expand column on mouse enter (Desktop)
+			col.addEventListener('mouseenter', () => {
+				if (window.innerWidth > 991) {
+					cols.forEach(c => c.classList.remove('is-active'));
+					col.classList.add('is-active');
+				}
+			});
+
+			// Expand column on click/tap (Mobile / Tablet)
+			col.addEventListener('click', () => {
+				if (window.innerWidth <= 991) {
+					const isActive = col.classList.contains('is-active');
+					cols.forEach(c => c.classList.remove('is-active'));
+					if (!isActive) {
+						col.classList.add('is-active');
+					}
+				}
+			});
+		});
 	}
-	window.addEventListener('scroll', () => {
-		if (!ticking) {
-			window.requestAnimationFrame(updateRing);
-			ticking = true;
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+
+	// 1. CUSTOM CURSOR TRACKING
+	const cursorDot = document.createElement('div');
+	const cursorFollower = document.createElement('div');
+	cursorDot.className = 'k-cursor-dot';
+	cursorFollower.className = 'k-cursor-follower';
+	document.body.appendChild(cursorDot);
+	document.body.appendChild(cursorFollower);
+
+	let mouseX = 0, mouseY = 0;
+	let followerX = 0, followerY = 0;
+
+	window.addEventListener('mousemove', (e) => {
+		mouseX = e.clientX;
+		mouseY = e.clientY;
+
+		cursorDot.style.left = `${mouseX}px`;
+		cursorDot.style.top = `${mouseY}px`;
+	});
+
+	function animateCursor() {
+		followerX += (mouseX - followerX) * 0.15;
+		followerY += (mouseY - followerY) * 0.15;
+		cursorFollower.style.left = `${followerX}px`;
+		cursorFollower.style.top = `${followerY}px`;
+		requestAnimationFrame(animateCursor);
+	}
+	animateCursor();
+
+	// Hover states for links & buttons
+	const interactiveElements = document.querySelectorAll('a, button, .k-mono-col, .k-work-item');
+	interactiveElements.forEach(el => {
+		el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+		el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+	});
+
+	// 2. PRELOADER COUNTDOWN ANIMATION
+	const loaderNum = document.getElementById('kLoaderNum');
+	const loaderBar = document.getElementById('kLoaderBar');
+	const preloader = document.getElementById('kPreloader');
+
+	if (loaderNum && loaderBar && preloader) {
+		let count = 0;
+		const interval = setInterval(() => {
+			count += Math.floor(Math.random() * 8) + 1;
+			if (count >= 100) {
+				count = 100;
+				clearInterval(interval);
+
+				// GSAP Preloader Curtain Out Reveal
+				if (typeof gsap !== 'undefined') {
+					gsap.to(preloader, {
+						clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)',
+						duration: 1,
+						ease: 'power4.inOut',
+						delay: 0.2,
+						onComplete: () => preloader.style.display = 'none'
+					});
+				} else {
+					preloader.style.display = 'none';
+				}
+			}
+			loaderNum.textContent = count.toString().padStart(3, '0');
+			loaderBar.style.width = `${count}%`;
+		}, 30);
+	}
+
+	// 3. OPTION A FLOATING PREVIEW CARD ON CURSOR MOVE
+	const workItems = document.querySelectorAll('.k-work-item');
+	const previewCard = document.getElementById('kHoverPreviewCard');
+	const previewImg = document.getElementById('kHoverPreviewImg');
+
+	if (workItems.length > 0 && previewCard && previewImg) {
+		workItems.forEach(item => {
+			item.addEventListener('mouseenter', () => {
+				const imgSrc = item.getAttribute('data-preview');
+				if (imgSrc) {
+					previewImg.src = imgSrc;
+					previewCard.classList.add('is-visible');
+				}
+			});
+
+			item.addEventListener('mousemove', (e) => {
+				if (typeof gsap !== 'undefined') {
+					gsap.to(previewCard, {
+						x: e.clientX,
+						y: e.clientY,
+						duration: 0.4,
+						ease: 'power2.out'
+					});
+				}
+			});
+
+			item.addEventListener('mouseleave', () => {
+				previewCard.classList.remove('is-visible');
+			});
+		});
+	}
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+
+	// 1. COOL NEO-BRUTALIST PRELOADER SEQUENCE
+	const loaderNum = document.getElementById('kLoaderNum');
+	const preloader = document.getElementById('kPreloader');
+	const curtainPanel = document.getElementById('kLoaderCurtain');
+	const statusText = document.getElementById('kLoaderStatus');
+
+	const loadingSteps = [
+		'INITIALIZING CORE...',
+		'ENQUEUING VECTOR ASSETS...',
+		'COMPILING GRAPHICS PIPELINE...',
+		'SYSTEM READY.'
+	];
+
+	if (loaderNum && preloader && curtainPanel) {
+		let count = 0;
+
+		const interval = setInterval(() => {
+			count += Math.floor(Math.random() * 7) + 2;
+
+			// Update status labels
+			if (statusText) {
+				if (count < 30) statusText.textContent = loadingSteps[0];
+				else if (count < 60) statusText.textContent = loadingSteps[1];
+				else if (count < 90) statusText.textContent = loadingSteps[2];
+				else statusText.textContent = loadingSteps[3];
+			}
+
+			if (count >= 100) {
+				count = 100;
+				clearInterval(interval);
+
+				// GSAP Smooth Curtain Reveal Timeline
+				if (typeof gsap !== 'undefined') {
+					const loaderTl = gsap.timeline();
+
+					loaderTl
+						.to(curtainPanel, {
+							y: '0%',
+							duration: 0.6,
+							ease: 'power4.in'
+						})
+						.to(preloader, {
+							display: 'none',
+							duration: 0
+						})
+						.to(curtainPanel, {
+							y: '-100%',
+							duration: 0.7,
+							ease: 'power4.out'
+						});
+				} else {
+					preloader.style.display = 'none';
+				}
+			}
+
+			loaderNum.textContent = count.toString().padStart(3, '0');
+		}, 35);
+	}
+
+	// 2. STAGGER REVEAL FOR WORK SHOWCASE SECTION
+	if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+		gsap.registerPlugin(ScrollTrigger);
+
+		gsap.to('.k-work-item', {
+			opacity: 1,
+			y: 0,
+			duration: 0.8,
+			stagger: 0.18,
+			ease: 'power3.out',
+			scrollTrigger: {
+				trigger: '.k-work-list',
+				start: 'top 80%',
+				toggleActions: 'play none none none'
+			}
+		});
+	} else {
+		// Fallback reveal
+		document.querySelectorAll('.k-work-item').forEach(item => {
+			item.style.opacity = '1';
+			item.style.transform = 'translateY(0)';
+		});
+	}
+
+	// 3. FLOATING CURSOR PREVIEW CARD (OPTION A)
+	const workItems = document.querySelectorAll('.k-work-item');
+	const previewCard = document.getElementById('kHoverPreviewCard');
+	const previewImg = document.getElementById('kHoverPreviewImg');
+
+	if (workItems.length > 0 && previewCard && previewImg) {
+		workItems.forEach(item => {
+			item.addEventListener('mouseenter', () => {
+				const imgSrc = item.getAttribute('data-preview');
+				if (imgSrc) {
+					previewImg.src = imgSrc;
+					previewCard.classList.add('is-visible');
+				}
+			});
+
+			item.addEventListener('mousemove', (e) => {
+				if (typeof gsap !== 'undefined') {
+					gsap.to(previewCard, {
+						x: e.clientX,
+						y: e.clientY,
+						duration: 0.35,
+						ease: 'power2.out'
+					});
+				}
+			});
+
+			item.addEventListener('mouseleave', () => {
+				previewCard.classList.remove('is-visible');
+			});
+		});
+	}
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+
+	// METHODOLOGY SEQUENTIAL STAGGER REVEAL WITH ASYMMETRICAL LASER DRAW
+	if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+		gsap.registerPlugin(ScrollTrigger);
+
+		const laserLine = document.getElementById('kLaserPathActive');
+		const nodes = document.querySelectorAll('.k-runway-node-item');
+
+		if (laserLine) {
+			const lineLength = laserLine.getTotalLength ? laserLine.getTotalLength() : 1600;
+			laserLine.style.strokeDasharray = lineLength;
+			laserLine.style.strokeDashoffset = lineLength;
+
+			// GSAP ScrollTrigger Sequence
+			const tl = gsap.timeline({
+				scrollTrigger: {
+					trigger: '#process',
+					start: 'top 65%',
+					end: 'bottom 80%',
+					scrub: 1.2
+				}
+			});
+
+			// 1. Draw Asymmetrical Laser Curve smoothly through nodes
+			tl.to(laserLine, {
+				strokeDashoffset: 0,
+				ease: 'none',
+				duration: 2
+			});
+
+			// 2. Reveal Nodes sequentially as wave passes
+			nodes.forEach((node, i) => {
+				tl.to(node, {
+					opacity: 1,
+					y: 0,
+					duration: 0.4,
+					onStart: () => node.classList.add('is-visible'),
+					onReverseComplete: () => node.classList.remove('is-visible')
+				}, i * 0.45);
+			});
 		}
-	}, { passive: true });
-	updateRing();
-
-	/* ---- Set bloom origin to trigger's center ---- */
-	function setOrigin() {
-		const rect = trigger.getBoundingClientRect();
-		const x = rect.left + rect.width / 2;
-		const y = rect.top + rect.height / 2;
-		root.style.setProperty('--origin-x', x + 'px');
-		root.style.setProperty('--origin-y', y + 'px');
+	} else {
+		// Fallback reveal
+		document.querySelectorAll('.k-runway-node-item').forEach(node => {
+			node.classList.add('is-visible');
+			node.style.opacity = '1';
+			node.style.transform = 'none';
+		});
 	}
-
-	/* ---- Open / close ---- */
-	function openBloom() {
-		setOrigin();
-		root.classList.add('is-open');
-		trigger.setAttribute('aria-expanded', 'true');
-		overlay.setAttribute('aria-hidden', 'false');
-		document.body.classList.add('matcha-lock-scroll');
-	}
-	function closeBloom() {
-		root.classList.remove('is-open');
-		trigger.setAttribute('aria-expanded', 'false');
-		overlay.setAttribute('aria-hidden', 'true');
-		document.body.classList.remove('matcha-lock-scroll');
-	}
-
-	trigger.addEventListener('click', () => {
-		root.classList.contains('is-open') ? closeBloom() : openBloom();
-	});
-
-	navLinks.forEach((link) => link.addEventListener('click', closeBloom));
-
-	document.addEventListener('keydown', (e) => {
-		if (e.key === 'Escape' && root.classList.contains('is-open')) closeBloom();
-	});
-
-	window.addEventListener('resize', () => {
-		if (root.classList.contains('is-open')) setOrigin();
-	});
-}
+});
