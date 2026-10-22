@@ -710,3 +710,145 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 });
+
+
+// QUESTIONNAIRE STEP NAVIGATION & PROGRESS
+function updateProgress(stepNum) {
+	const progressFill = document.getElementById('kQProgress');
+	if (progressFill) {
+		progressFill.style.width = `${stepNum * 25}%`;
+	}
+}
+
+function nextQuestion(currentStep) {
+	const currentEl = document.querySelector(`.k-q-step[data-step="${currentStep}"]`);
+	const nextEl = document.querySelector(`.k-q-step[data-step="${currentStep + 1}"]`);
+
+	if (currentEl && nextEl) {
+		if (typeof gsap !== 'undefined') {
+			gsap.to(currentEl, {
+				x: -40,
+				opacity: 0,
+				duration: 0.3,
+				onComplete: () => {
+					currentEl.classList.remove('is-active');
+					nextEl.classList.add('is-active');
+					gsap.fromTo(nextEl, 
+						{ x: 40, opacity: 0 },
+						{ x: 0, opacity: 1, duration: 0.35 }
+					);
+				}
+			});
+		} else {
+			currentEl.classList.remove('is-active');
+			nextEl.classList.add('is-active');
+		}
+		updateProgress(currentStep + 1);
+	}
+}
+
+function prevQuestion(currentStep) {
+	const currentEl = document.querySelector(`.k-q-step[data-step="${currentStep}"]`);
+	const prevEl = document.querySelector(`.k-q-step[data-step="${currentStep - 1}"]`);
+
+	if (currentEl && prevEl) {
+		if (typeof gsap !== 'undefined') {
+			gsap.to(currentEl, {
+				x: 40,
+				opacity: 0,
+				duration: 0.3,
+				onComplete: () => {
+					currentEl.classList.remove('is-active');
+					prevEl.classList.add('is-active');
+					gsap.fromTo(prevEl, 
+						{ x: -40, opacity: 0 },
+						{ x: 0, opacity: 1, duration: 0.35 }
+					);
+				}
+			});
+		} else {
+			currentEl.classList.remove('is-active');
+			prevEl.classList.add('is-active');
+		}
+		updateProgress(currentStep - 1);
+	}
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+
+	// REST API TRANSMISSION HANDLER
+	const submitBtn = document.getElementById('kSubmitInquiry');
+	if (submitBtn) {
+		submitBtn.addEventListener('click', async () => {
+			
+			const targetEmail = submitBtn.getAttribute('data-target-email') || '';
+			const serviceInputs = document.querySelectorAll('input[name="services"]:checked');
+			const selectedServices = Array.from(serviceInputs).map(cb => cb.value);
+
+			const budgetInput = document.querySelector('input[name="budget"]:checked');
+			const selectedBudget = budgetInput ? budgetInput.value : 'Not Specified';
+
+			const projectDetails = document.getElementById('kProjectDetails').value;
+			const clientName = document.getElementById('kClientName').value;
+			const clientEmail = document.getElementById('kClientEmail').value;
+
+			if (!clientName || !clientEmail) {
+				alert('PLEASE PROVIDE YOUR NAME AND EMAIL ADDRESS.');
+				return;
+			}
+
+			const btnTextSpan = submitBtn.querySelector('span');
+			if (btnTextSpan) btnTextSpan.textContent = 'TRANSMITTING...';
+			submitBtn.disabled = true;
+
+			try {
+				const response = await fetch('/wp-json/kinetic/v1/submit-inquiry', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						services: selectedServices,
+						budget: selectedBudget,
+						details: projectDetails,
+						name: clientName,
+						email: clientEmail,
+						recipient: targetEmail
+					})
+				});
+
+				const result = await response.json();
+
+				const step4 = document.querySelector('.k-q-step[data-step="4"]');
+				const responseStep = document.getElementById('kResponseStep');
+				const responseMsg = document.getElementById('kResponseMsg');
+
+				if (step4 && responseStep) {
+					if (typeof gsap !== 'undefined') {
+						gsap.to(step4, {
+							scale: 0.95,
+							opacity: 0,
+							duration: 0.3,
+							onComplete: () => {
+								step4.classList.remove('is-active');
+								responseStep.classList.add('is-active');
+								if (responseMsg) responseMsg.textContent = result.message;
+								gsap.fromTo('.k-success-terminal-card', 
+									{ scale: 0.9, opacity: 0 },
+									{ scale: 1, opacity: 1, duration: 0.6, ease: 'back.out(1.7)' }
+								);
+							}
+						});
+					} else {
+						step4.classList.remove('is-active');
+						responseStep.classList.add('is-active');
+						if (responseMsg) responseMsg.textContent = result.message;
+					}
+				}
+
+			} catch (error) {
+				alert('TRANSMISSION ERROR. PLEASE EMAIL US DIRECTLY.');
+				if (btnTextSpan) btnTextSpan.textContent = 'TRANSMIT INQUIRY';
+				submitBtn.disabled = false;
+			}
+		});
+	}
+});

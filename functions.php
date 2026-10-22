@@ -59,3 +59,61 @@ function kinetic_register_elementor_widgets( $widgets_manager ) {
 }
 add_action( 'elementor/widgets/register', 'kinetic_register_elementor_widgets' );
 
+/**
+ * Register Custom REST API Endpoint for Terminal Contact Questionnaire
+ */
+function kinetic_register_contact_endpoint() {
+    register_rest_route( 'kinetic/v1', '/submit-inquiry', array(
+        'methods'             => 'POST',
+        'callback'            => 'kinetic_handle_inquiry_submission',
+        'permission_callback' => '__return_true',
+    ) );
+}
+add_action( 'rest_api_init', 'kinetic_register_contact_endpoint' );
+
+function kinetic_handle_inquiry_submission( $request ) {
+    $params = $request->get_json_params();
+
+    // Sanitize Inputs
+    $services = ! empty( $params['services'] ) ? array_map( 'sanitize_text_field', $params['services'] ) : array();
+    $budget   = ! empty( $params['budget'] ) ? sanitize_text_field( $params['budget'] ) : 'NOT SPECIFIED';
+    $details  = ! empty( $params['details'] ) ? sanitize_textarea_field( $params['details'] ) : '';
+    $name     = ! empty( $params['name'] ) ? sanitize_text_field( $params['name'] ) : '';
+    $email    = ! empty( $params['email'] ) ? sanitize_email( $params['email'] ) : '';
+
+    // Validation
+    if ( empty( $name ) || empty( $email ) || ! is_email( $email ) ) {
+        return new WP_REST_Response( array(
+            'success' => false,
+            'message' => 'VALID NAME AND EMAIL ARE REQUIRED.',
+        ), 400 );
+    }
+
+    // Build Email Body
+    $admin_email = get_option( 'admin_email' );
+    $subject     = '⚡ NEW KINETIC INQUIRY: ' . strtoupper( $name );
+    
+    $message  = "<h2>NEW PROJECT INQUIRY SUBMISSION</h2><hr>";
+    $message .= "<p><strong>Client Name:</strong> {$name}</p>";
+    $message .= "<p><strong>Email:</strong> {$email}</p>";
+    $message .= "<p><strong>Services Required:</strong> " . implode( ', ', $services ) . "</p>";
+    $message .= "<p><strong>Budget Tier:</strong> {$budget}</p>";
+    $message .= "<p><strong>Project Details:</strong><br>{$details}</p>";
+
+    $headers = array( 'Content-Type: text/html; charset=UTF-8', "From: KINETIC Engine <{$admin_email}>" );
+
+    // Send Mail via WordPress Engine
+    $mail_sent = wp_mail( $admin_email, $subject, $message, $headers );
+
+    if ( $mail_sent ) {
+        return new WP_REST_Response( array(
+            'success' => true,
+            'message' => 'INQUIRY TRANSMITTED SUCCESSFULLY.',
+        ), 200 );
+    } else {
+        return new WP_REST_Response( array(
+            'success' => false,
+            'message' => 'SERVER MAIL ERROR. PLEASE TRY AGAIN LATER.',
+        ), 500 );
+    }
+}
