@@ -2732,3 +2732,470 @@ body {
 	scrollbar-width: thin;
 	scrollbar-color: #1c1c28 #070709;
 }
+
+/* ============================================================
+   HERO ACCORDION MONOLITH — PREMIUM EDITION
+   Cinematic bg imagery, cursor spotlight, autoplay, magnetic CTA
+   ============================================================ */
+
+:root {
+	--hero-accent: #ccff00;
+	--hero-bg: #070709;
+	--hero-border: #1a1a24;
+	--hero-overlay: 0.55;
+	--font-mono: 'Courier New', Courier, monospace;
+	--ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.k-hero-monolith {
+	width: 100%;
+	height: calc(100vh - 80px);
+	min-height: 650px;
+	background-color: var(--hero-bg);
+	position: relative;
+	overflow: hidden;
+	border-bottom: 2px solid var(--hero-border);
+}
+
+.k-monolith-container {
+	display: flex;
+	width: 100%;
+	height: 100%;
+}
+
+/* ============================================================
+   COLUMN — BASE
+   ============================================================ */
+.k-mono-col {
+	flex: 1;
+	height: 100%;
+	position: relative;
+	border-right: 1px solid var(--hero-border);
+	cursor: pointer;
+	overflow: hidden;
+	transition: flex 0.9s var(--ease-premium);
+}
+
+/* Autoplay progress line (top edge) */
+.k-col-progress {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 2px;
+	width: 0%;
+	background: var(--hero-accent);
+	z-index: 6;
+	transition: width linear;
+}
+
+.k-autoplay-off .k-col-progress {
+	display: none;
+}
+
+/* Background image layer — desaturated & dim until active */
+.k-col-bg {
+	position: absolute;
+	inset: 0;
+	background-size: cover;
+	background-position: center;
+	filter: grayscale(1) brightness(0.32) contrast(1.05);
+	transform: scale(1.18);
+	transition: filter 1.2s var(--ease-premium), transform 1.6s var(--ease-premium);
+	z-index: 0;
+}
+
+/* Fallback gradient when no image is supplied — tinted per column via hue-rotate */
+.k-mono-col--fallback .k-col-bg {
+	background:
+		radial-gradient(circle at 30% 20%, rgba(204, 255, 0, 0.14) 0%, transparent 55%),
+		linear-gradient(160deg, #15161c 0%, #08080a 100%);
+	filter: hue-rotate(calc(var(--col-index, 0) * 28deg)) brightness(0.6);
+}
+
+.k-mono-col.is-active .k-col-bg {
+	filter: grayscale(0) brightness(0.62) contrast(1.05);
+	transform: scale(1.03);
+}
+
+.k-mono-col--fallback.is-active .k-col-bg {
+	filter: hue-rotate(calc(var(--col-index, 0) * 28deg)) brightness(0.85);
+}
+
+/* Legibility overlay — stronger at the edges, eased on expand */
+.k-col-overlay {
+	position: absolute;
+	inset: 0;
+	background:
+		linear-gradient(to top, rgba(4, 4, 6, 0.95) 0%, rgba(4, 4, 6, 0.35) 55%, rgba(4, 4, 6, 0.7) 100%);
+	opacity: calc(0.65 + (var(--hero-overlay) * 0.35));
+	transition: opacity 0.7s ease;
+	z-index: 1;
+}
+
+.k-mono-col.is-active .k-col-overlay {
+	opacity: var(--hero-overlay);
+}
+
+/* Cursor-tracked radial spotlight — only meaningful on the active column */
+.k-col-spotlight {
+	position: absolute;
+	inset: 0;
+	background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(204, 255, 0, 0.16), transparent 62%);
+	opacity: 0;
+	transition: opacity 0.5s ease;
+	z-index: 2;
+	pointer-events: none;
+}
+
+.k-mono-col.is-active .k-col-spotlight {
+	opacity: 1;
+}
+
+/* Subtle fine grid texture for a technical, premium feel */
+.k-mono-col::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background-image:
+		repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0, rgba(255, 255, 255, 0.025) 1px, transparent 1px, transparent 32px),
+		repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.02) 0, rgba(255, 255, 255, 0.02) 1px, transparent 1px, transparent 32px);
+	z-index: 1;
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+/* Corner frame marks — draw in when active, premium "focus bracket" cue */
+.k-col-frame {
+	position: absolute;
+	width: 0;
+	height: 0;
+	border: 0 solid var(--hero-accent);
+	z-index: 5;
+	transition: width 0.5s var(--ease-premium) 0.15s, height 0.5s var(--ease-premium) 0.15s, border-width 0.3s ease 0.15s;
+	pointer-events: none;
+}
+
+.k-col-frame--tl {
+	top: 1.75rem;
+	left: 1.75rem;
+	border-width: 0 0 0 0;
+}
+
+.k-col-frame--br {
+	bottom: 1.75rem;
+	right: 1.75rem;
+	border-width: 0 0 0 0;
+}
+
+.k-mono-col.is-active .k-col-frame--tl {
+	width: 28px;
+	height: 28px;
+	border-width: 2px 0 0 2px;
+}
+
+.k-mono-col.is-active .k-col-frame--br {
+	width: 28px;
+	height: 28px;
+	border-width: 0 2px 2px 0;
+}
+
+/* Border line vertical draw animation (GSAP timeline controls height) */
+.k-col-border {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 1px;
+	height: 0%;
+	background: linear-gradient(180deg, var(--hero-accent) 0%, rgba(204, 255, 0, 0.1) 100%);
+	z-index: 4;
+}
+
+/* ============================================================
+   COLLAPSED STATE
+   ============================================================ */
+.k-col-collapsed {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	padding: 3.5rem 1.5rem;
+	align-items: center;
+	z-index: 3;
+	transition: opacity 0.35s ease;
+}
+
+.k-col-num {
+	font-family: var(--font-mono);
+	font-size: 0.85rem;
+	color: var(--hero-accent);
+	letter-spacing: 0.1em;
+	opacity: 0;
+	transform: translateY(-20px);
+}
+
+.k-col-vertical-title {
+	writing-mode: vertical-rl;
+	transform: rotate(180deg);
+	font-size: 2.5rem;
+	font-weight: 900;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	color: transparent;
+	-webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.4);
+	transition: -webkit-text-stroke 0.4s ease, text-shadow 0.4s ease;
+	white-space: nowrap;
+	margin-top: 3rem;
+	opacity: 0;
+}
+
+.k-mono-col:hover .k-col-vertical-title {
+	-webkit-text-stroke: 1.5px var(--hero-accent);
+	text-shadow: 0 0 24px rgba(204, 255, 0, 0.35);
+}
+
+/* ============================================================
+   EXPANDED / ACTIVE STATE
+   ============================================================ */
+.k-mono-col.is-active {
+	flex: 4;
+	cursor: default;
+}
+
+.k-mono-col.is-active .k-col-collapsed {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.k-col-expanded {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	padding: 4rem;
+	opacity: 0;
+	transform: translateY(30px);
+	pointer-events: none;
+	transition: opacity 0.6s ease 0.25s, transform 0.6s var(--ease-premium) 0.25s;
+	z-index: 3;
+}
+
+.k-mono-col.is-active .k-col-expanded {
+	opacity: 1;
+	transform: translateY(0);
+	pointer-events: auto;
+}
+
+.k-exp-header {
+	display: flex;
+	align-items: baseline;
+	gap: 1.5rem;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+	padding-bottom: 1.5rem;
+}
+
+.k-exp-num {
+	font-family: var(--font-mono);
+	font-size: 1.5rem;
+	color: var(--hero-accent);
+	font-weight: 700;
+}
+
+.k-exp-title {
+	font-size: 2.8vw;
+	font-weight: 900;
+	color: #fff;
+	letter-spacing: -0.03em;
+	text-transform: uppercase;
+	text-shadow: 0 2px 30px rgba(0, 0, 0, 0.6);
+}
+
+.k-exp-tagline {
+	font-size: 1.15rem;
+	color: #d4d4db;
+	max-width: 600px;
+	line-height: 1.5;
+	margin-top: 1.5rem;
+	text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5);
+}
+
+.k-exp-body {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 2rem;
+	margin: 2rem 0;
+}
+
+.k-exp-features {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	max-width: 450px;
+}
+
+.k-feat-tag {
+	font-family: var(--font-mono);
+	font-size: 0.75rem;
+	padding: 0.5rem 1rem;
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	background: rgba(0, 0, 0, 0.25);
+	backdrop-filter: blur(6px);
+	color: var(--hero-accent);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	transition: border-color 0.3s ease, background-color 0.3s ease, transform 0.25s ease;
+}
+
+.k-feat-tag:hover {
+	border-color: var(--hero-accent);
+	background: rgba(204, 255, 0, 0.1);
+	transform: translateY(-2px);
+}
+
+.k-exp-illustration {
+	width: 220px;
+	height: 160px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	animation: kFloat 4s ease-in-out infinite alternate;
+	opacity: 0.85;
+}
+
+@keyframes kFloat {
+	0% { transform: translateY(0px); }
+	100% { transform: translateY(-10px); }
+}
+
+.k-spin-ring {
+	transform-origin: center;
+	animation: kSpin 12s linear infinite;
+}
+
+@keyframes kSpin {
+	100% { transform: rotate(360deg); }
+}
+
+.k-svg-art {
+	width: 100%;
+	height: 100%;
+}
+
+/* ============================================================
+   CTA — MAGNETIC BUTTON
+   ============================================================ */
+.k-exp-footer {
+	border-top: 1px solid rgba(255, 255, 255, 0.12);
+	padding-top: 1.5rem;
+}
+
+.k-exp-btn {
+	display: inline-flex;
+	position: relative;
+	text-decoration: none;
+	will-change: transform;
+}
+
+.k-magnetic-inner {
+	display: inline-flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 1rem 2rem;
+	background: var(--hero-accent);
+	color: #000;
+	font-weight: 800;
+	font-size: 0.85rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.k-exp-btn:hover .k-magnetic-inner {
+	background-color: #ffffff;
+	box-shadow: 0 10px 30px rgba(204, 255, 0, 0.25);
+}
+
+.k-magnetic-inner svg {
+	transition: transform 0.3s ease;
+}
+
+.k-exp-btn:hover .k-magnetic-inner svg {
+	transform: translateX(4px);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 991px) {
+	.k-hero-monolith {
+		height: auto;
+		min-height: auto;
+	}
+
+	.k-monolith-container {
+		flex-direction: column;
+	}
+
+	.k-mono-col {
+		width: 100%;
+		height: 90px;
+		border-right: none;
+		border-bottom: 1px solid var(--hero-border);
+	}
+
+	.k-col-collapsed {
+		flex-direction: row;
+		padding: 0 2rem;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	.k-col-vertical-title {
+		writing-mode: horizontal-tb;
+		transform: none;
+		font-size: 1.3rem;
+		margin-top: 0;
+	}
+
+	.k-mono-col.is-active {
+		height: auto;
+		flex: none;
+	}
+
+	.k-col-expanded {
+		position: relative;
+		inset: auto;
+		padding: 2.5rem 1.5rem;
+	}
+
+	.k-exp-title {
+		font-size: 1.8rem;
+	}
+
+	.k-exp-body {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.k-col-spotlight,
+	.k-col-frame {
+		display: none;
+	}
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+	.k-mono-col,
+	.k-col-bg,
+	.k-col-overlay,
+	.k-col-expanded,
+	.k-col-collapsed,
+	.k-exp-illustration,
+	.k-magnetic-inner,
+	.k-col-frame {
+		transition: none !important;
+		animation: none !important;
+	}
+}

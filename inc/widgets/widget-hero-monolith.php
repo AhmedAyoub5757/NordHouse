@@ -23,6 +23,9 @@ class Kinetic_Hero_Monolith_Widget extends \Elementor\Widget_Base {
 
 	protected function register_controls() {
 
+		/* ============================================================
+		 * CONTENT — COLUMNS
+		 * ============================================================ */
 		$this->start_controls_section(
 			'section_services',
 			array(
@@ -63,9 +66,9 @@ class Kinetic_Hero_Monolith_Widget extends \Elementor\Widget_Base {
 		$repeater->add_control(
 			'col_features',
 			array(
-				'label'       => __( 'Feature List (Separated by Bullet •)', 'kinetic' ),
-				'type'        => \Elementor\Controls_Manager::TEXTAREA,
-				'default'     => 'Custom Themes • Headless WP • React/Next.js • REST APIs',
+				'label'   => __( 'Feature List (Separated by Bullet •)', 'kinetic' ),
+				'type'    => \Elementor\Controls_Manager::TEXTAREA,
+				'default' => 'Custom Themes • Headless WP • React/Next.js • REST APIs',
 			)
 		);
 
@@ -88,12 +91,21 @@ class Kinetic_Hero_Monolith_Widget extends \Elementor\Widget_Base {
 		);
 
 		$repeater->add_control(
+			'col_bg_image',
+			array(
+				'label'   => __( 'Background Image (recommended, premium feel)', 'kinetic' ),
+				'type'    => \Elementor\Controls_Manager::MEDIA,
+				'default' => array( 'url' => '' ),
+			)
+		);
+
+		$repeater->add_control(
 			'col_svg_type',
 			array(
-				'label'   => __( 'Vector Illustration Preset', 'kinetic' ),
-				'type'    => \Elementor\Controls_Manager::SELECT,
-				'default' => 'web',
-				'options' => array(
+				'label'       => __( 'Fallback Vector Illustration (used only if no image set)', 'kinetic' ),
+				'type'        => \Elementor\Controls_Manager::SELECT,
+				'default'     => 'web',
+				'options'     => array(
 					'web'         => __( 'Web Dev Illustration', 'kinetic' ),
 					'mobile'      => __( 'Mobile App Illustration', 'kinetic' ),
 					'uiux'        => __( 'UI/UX Design Illustration', 'kinetic' ),
@@ -152,7 +164,47 @@ class Kinetic_Hero_Monolith_Widget extends \Elementor\Widget_Base {
 
 		$this->end_controls_section();
 
-		// STYLE SECTION
+		/* ============================================================
+		 * CONTENT — BEHAVIOR
+		 * ============================================================ */
+		$this->start_controls_section(
+			'section_behavior',
+			array(
+				'label' => __( 'Interaction & Autoplay', 'kinetic' ),
+				'tab'   => \Elementor\Controls_Manager::TAB_CONTENT,
+			)
+		);
+
+		$this->add_control(
+			'enable_autoplay',
+			array(
+				'label'        => __( 'Idle Autoplay (cycles columns when no one is interacting)', 'kinetic' ),
+				'type'         => \Elementor\Controls_Manager::SWITCHER,
+				'label_on'     => __( 'Yes', 'kinetic' ),
+				'label_off'    => __( 'No', 'kinetic' ),
+				'return_value' => 'yes',
+				'default'      => 'yes',
+			)
+		);
+
+		$this->add_control(
+			'autoplay_interval',
+			array(
+				'label'     => __( 'Autoplay Interval (ms)', 'kinetic' ),
+				'type'      => \Elementor\Controls_Manager::NUMBER,
+				'default'   => 4500,
+				'min'       => 2000,
+				'max'       => 15000,
+				'step'      => 500,
+				'condition' => array( 'enable_autoplay' => 'yes' ),
+			)
+		);
+
+		$this->end_controls_section();
+
+		/* ============================================================
+		 * STYLE
+		 * ============================================================ */
 		$this->start_controls_section(
 			'section_style',
 			array(
@@ -164,7 +216,7 @@ class Kinetic_Hero_Monolith_Widget extends \Elementor\Widget_Base {
 		$this->add_control(
 			'accent_color',
 			array(
-				'label'     => __( 'Neon Accent Color', 'kinetic' ),
+				'label'     => __( 'Accent Color', 'kinetic' ),
 				'type'      => \Elementor\Controls_Manager::COLOR,
 				'default'   => '#ccff00',
 				'selectors' => array(
@@ -173,26 +225,63 @@ class Kinetic_Hero_Monolith_Widget extends \Elementor\Widget_Base {
 			)
 		);
 
+		$this->add_control(
+			'overlay_strength',
+			array(
+				'label'     => __( 'Image Overlay Darkness', 'kinetic' ),
+				'type'      => \Elementor\Controls_Manager::SLIDER,
+				'range'     => array( 'px' => array( 'min' => 0, 'max' => 1, 'step' => 0.05 ) ),
+				'default'   => array( 'size' => 0.55, 'unit' => 'px' ),
+				'selectors' => array(
+					'{{WRAPPER}}' => '--hero-overlay: {{SIZE}};',
+				),
+			)
+		);
+
 		$this->end_controls_section();
 	}
 
 	protected function render() {
-		$settings = $this->get_settings_for_display();
+		$settings        = $this->get_settings_for_display();
+		$enable_autoplay = ! empty( $settings['enable_autoplay'] ) && 'yes' === $settings['enable_autoplay'];
+		$interval        = ! empty( $settings['autoplay_interval'] ) ? (int) $settings['autoplay_interval'] : 4500;
 		?>
-		<section class="k-hero-monolith">
+		<section
+			class="k-hero-monolith <?php echo $enable_autoplay ? 'k-autoplay-on' : 'k-autoplay-off'; ?>"
+			data-autoplay="<?php echo $enable_autoplay ? 'true' : 'false'; ?>"
+			data-interval="<?php echo esc_attr( $interval ); ?>"
+		>
 			<div class="k-monolith-container">
-				<?php foreach ( $settings['services_list'] as $index => $col ) : 
-					$cta_url = ! empty( $col['col_cta_link']['url'] ) ? $col['col_cta_link']['url'] : '#contact';
+				<?php foreach ( $settings['services_list'] as $index => $col ) :
+					$cta_url    = ! empty( $col['col_cta_link']['url'] ) ? $col['col_cta_link']['url'] : '#contact';
+					$bg_url     = ! empty( $col['col_bg_image']['url'] ) ? $col['col_bg_image']['url'] : '';
+					$has_image  = '' !== $bg_url;
 				?>
-					<div class="k-mono-col <?php echo $index === 0 ? 'is-active' : ''; ?>" data-col="<?php echo esc_attr($index); ?>">
-						
-						<!-- Animated Ambient Gradient Layer -->
-						<div class="k-col-gradient-bg"></div>
+					<div
+						class="k-mono-col <?php echo $index === 0 ? 'is-active' : ''; ?> <?php echo $has_image ? '' : 'k-mono-col--fallback'; ?>"
+						data-col="<?php echo esc_attr( $index ); ?>"
+						style="--col-index: <?php echo esc_attr( $index ); ?>;"
+					>
+						<!-- Autoplay progress indicator -->
+						<div class="k-col-progress"></div>
 
-						<!-- Border Line Animation -->
+						<!-- Background image / fallback gradient layer -->
+						<div class="k-col-bg" <?php echo $has_image ? 'style="background-image:url(' . esc_url( $bg_url ) . ')"' : ''; ?>></div>
+
+						<!-- Darkening overlay for legibility -->
+						<div class="k-col-overlay"></div>
+
+						<!-- Cursor-tracked spotlight glow -->
+						<div class="k-col-spotlight"></div>
+
+						<!-- Animated corner frame marks -->
+						<span class="k-col-frame k-col-frame--tl"></span>
+						<span class="k-col-frame k-col-frame--br"></span>
+
+						<!-- Vertical line animation (column divider, GSAP timed) -->
 						<div class="k-col-border"></div>
 
-						<!-- Collapsed State (Hollow Vertical Text, No Plus Icon) -->
+						<!-- Collapsed State -->
 						<div class="k-col-collapsed">
 							<span class="k-col-num">// <?php echo esc_html( $col['col_index'] ); ?></span>
 							<h2 class="k-col-vertical-title"><?php echo esc_html( $col['col_title'] ); ?></h2>
@@ -208,28 +297,31 @@ class Kinetic_Hero_Monolith_Widget extends \Elementor\Widget_Base {
 							<p class="k-exp-tagline"><?php echo esc_html( $col['col_tagline'] ); ?></p>
 
 							<div class="k-exp-body">
-								<!-- Feature Tags -->
 								<div class="k-exp-features">
-									<?php 
+									<?php
 									$features = explode( '•', $col['col_features'] );
 									foreach ( $features as $feat ) :
 										if ( trim( $feat ) !== '' ) : ?>
 											<span class="k-feat-tag"><?php echo esc_html( trim( $feat ) ); ?></span>
 										<?php endif;
-									endforeach; 
+									endforeach;
 									?>
 								</div>
 
-								<!-- Floating SVG Vector Graphic -->
-								<div class="k-exp-illustration">
-									<?php $this->render_vector_illustration( $col['col_svg_type'] ); ?>
-								</div>
+								<?php if ( ! $has_image ) : ?>
+									<!-- Fallback vector illustration only shown when no bg image is set -->
+									<div class="k-exp-illustration">
+										<?php $this->render_vector_illustration( $col['col_svg_type'] ); ?>
+									</div>
+								<?php endif; ?>
 							</div>
 
 							<div class="k-exp-footer">
-								<a href="<?php echo esc_url( $cta_url ); ?>" class="k-exp-btn">
-									<span><?php echo esc_html( $col['col_cta_text'] ); ?></span>
-									<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+								<a href="<?php echo esc_url( $cta_url ); ?>" class="k-exp-btn k-magnetic">
+									<span class="k-magnetic-inner">
+										<span><?php echo esc_html( $col['col_cta_text'] ); ?></span>
+										<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+									</span>
 								</a>
 							</div>
 						</div>

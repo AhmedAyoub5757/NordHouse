@@ -914,3 +914,174 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	}
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+	const heroes = document.querySelectorAll('.k-hero-monolith');
+
+	heroes.forEach((hero) => {
+		const cols = hero.querySelectorAll('.k-mono-col');
+		if (!cols.length) return;
+
+		const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const autoplayEnabled = hero.dataset.autoplay === 'true' && !prefersReducedMotion;
+		const interval = parseInt(hero.dataset.interval, 10) || 4500;
+
+		let activeIndex = 0;
+		let autoplayTimer = null;
+		let resumeTimer = null;
+		let userInteracting = false;
+
+		/* ---------------------------------------------------------
+		 * GSAP entrance timeline
+		 * --------------------------------------------------------- */
+		if (typeof gsap !== 'undefined') {
+			const tl = gsap.timeline({ delay: 0.3 });
+
+			tl.to(hero.querySelectorAll('.k-col-border'), {
+				height: '100%',
+				duration: 0.8,
+				stagger: 0.1,
+				ease: 'power3.inOut'
+			})
+				.to(hero.querySelectorAll('.k-col-num'), {
+					y: 0,
+					opacity: 1,
+					duration: 0.5,
+					stagger: 0.08,
+					ease: 'power2.out'
+				}, '-=0.4')
+				.to(hero.querySelectorAll('.k-col-vertical-title'), {
+					opacity: 1,
+					duration: 0.6,
+					stagger: 0.08,
+					ease: 'power3.out'
+				}, '-=0.3');
+		}
+
+		/* ---------------------------------------------------------
+		 * Core: set active column
+		 * --------------------------------------------------------- */
+		function setActive(index) {
+			activeIndex = index;
+			cols.forEach((c, i) => {
+				c.classList.toggle('is-active', i === index);
+				resetProgress(c);
+			});
+			if (autoplayEnabled && !userInteracting) {
+				startProgress(cols[index]);
+			}
+		}
+
+		/* ---------------------------------------------------------
+		 * Autoplay progress bar
+		 * --------------------------------------------------------- */
+		function resetProgress(col) {
+			const bar = col.querySelector('.k-col-progress');
+			if (!bar) return;
+			bar.style.transition = 'none';
+			bar.style.width = '0%';
+		}
+
+		function startProgress(col) {
+			const bar = col.querySelector('.k-col-progress');
+			if (!bar) return;
+			// Force reflow so the transition restarts cleanly.
+			// eslint-disable-next-line no-unused-expressions
+			bar.offsetWidth;
+			bar.style.transition = `width ${interval}ms linear`;
+			bar.style.width = '100%';
+		}
+
+		/* ---------------------------------------------------------
+		 * Autoplay loop — pauses while the user is interacting
+		 * --------------------------------------------------------- */
+		function startAutoplay() {
+			if (!autoplayEnabled) return;
+			clearInterval(autoplayTimer);
+			startProgress(cols[activeIndex]);
+			autoplayTimer = setInterval(() => {
+				const next = (activeIndex + 1) % cols.length;
+				setActive(next);
+			}, interval);
+		}
+
+		function pauseAutoplay() {
+			clearInterval(autoplayTimer);
+			autoplayTimer = null;
+			cols.forEach(resetProgress);
+		}
+
+		function scheduleResume() {
+			clearTimeout(resumeTimer);
+			resumeTimer = setTimeout(() => {
+				userInteracting = false;
+				startAutoplay();
+			}, 1200);
+		}
+
+		/* ---------------------------------------------------------
+		 * Hover / click interaction
+		 * --------------------------------------------------------- */
+		cols.forEach((col, i) => {
+			col.addEventListener('mouseenter', () => {
+				if (window.innerWidth > 991) {
+					userInteracting = true;
+					clearTimeout(resumeTimer);
+					pauseAutoplay();
+					setActive(i);
+				}
+			});
+
+			col.addEventListener('click', () => {
+				if (window.innerWidth <= 991) {
+					const isActive = col.classList.contains('is-active');
+					cols.forEach((c) => c.classList.remove('is-active'));
+					if (!isActive) col.classList.add('is-active');
+				}
+			});
+
+			// Cursor-tracked spotlight glow
+			col.addEventListener('mousemove', (e) => {
+				const rect = col.getBoundingClientRect();
+				const mx = ((e.clientX - rect.left) / rect.width) * 100;
+				const my = ((e.clientY - rect.top) / rect.height) * 100;
+				col.style.setProperty('--mx', `${mx}%`);
+				col.style.setProperty('--my', `${my}%`);
+			});
+		});
+
+		hero.addEventListener('mouseleave', () => {
+			if (window.innerWidth > 991 && autoplayEnabled) {
+				scheduleResume();
+			}
+		});
+
+		/* ---------------------------------------------------------
+		 * Magnetic CTA buttons
+		 * --------------------------------------------------------- */
+		if (!prefersReducedMotion) {
+			hero.querySelectorAll('.k-magnetic').forEach((btn) => {
+				const inner = btn.querySelector('.k-magnetic-inner');
+				if (!inner) return;
+
+				btn.addEventListener('mousemove', (e) => {
+					const rect = btn.getBoundingClientRect();
+					const relX = e.clientX - rect.left - rect.width / 2;
+					const relY = e.clientY - rect.top - rect.height / 2;
+					inner.style.transform = `translate(${relX * 0.25}px, ${relY * 0.4}px)`;
+				});
+
+				btn.addEventListener('mouseleave', () => {
+					inner.style.transform = 'translate(0, 0)';
+				});
+			});
+		}
+
+		/* ---------------------------------------------------------
+		 * Kick off autoplay
+		 * --------------------------------------------------------- */
+		if (autoplayEnabled) {
+			startAutoplay();
+		}
+	});
+});
