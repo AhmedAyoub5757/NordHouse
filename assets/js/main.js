@@ -531,42 +531,87 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	}
 
-	// 2. PRICING CARDS & FEATURE LIST GSAP STAGGER REVEAL
+	// 2. PRICING CARDS & FEATURE LIST GSAP STAGGER REVEAL (EACH LIST ITEM APPEARS ONE BY ONE)
 	if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
 		gsap.registerPlugin(ScrollTrigger);
 
-		// Card staggered rise
-		gsap.to('.k-pricing-card', {
-			opacity: 1,
-			y: 0,
-			duration: 0.8,
-			stagger: 0.2,
-			ease: 'power3.out',
-			scrollTrigger: {
-				trigger: '.k-pricing-grid',
-				start: 'top 75%',
-				toggleActions: 'play none none none'
+		// Animate section header elements first
+		gsap.fromTo('.k-pricing-header > *',
+			{ opacity: 0, y: 30 },
+			{
+				opacity: 1,
+				y: 0,
+				duration: 0.7,
+				stagger: 0.15,
+				ease: 'power3.out',
+				scrollTrigger: {
+					trigger: '.k-pricing-section',
+					start: 'top 78%',
+					toggleActions: 'play none none none'
+				}
 			}
-		});
+		);
 
-		// Stagger feature rows within each card
-		document.querySelectorAll('.k-pricing-card').forEach(card => {
-			gsap.from(card.querySelectorAll('.k-feat-row'), {
-				opacity: 0,
-				x: -15,
-				duration: 0.5,
-				stagger: 0.08,
-				ease: 'power2.out',
+		// Stagger cards and inside each card stagger each list item one by one
+		const pricingCards = document.querySelectorAll('.k-pricing-card');
+		pricingCards.forEach((card, index) => {
+			const cardTl = gsap.timeline({
 				scrollTrigger: {
 					trigger: card,
-					start: 'top 80%'
+					start: 'top 82%',
+					toggleActions: 'play none none none'
 				}
 			});
+
+			// 1. Card itself rises
+			cardTl.fromTo(card,
+				{ opacity: 0, y: 50 },
+				{ opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: index * 0.15 }
+			);
+
+			// 2. Plan price & title
+			const topParts = card.querySelectorAll('.k-card-top, .k-card-price-box');
+			cardTl.fromTo(topParts,
+				{ opacity: 0, y: 15 },
+				{ opacity: 1, y: 0, duration: 0.4, stagger: 0.1, ease: 'power2.out' },
+				'-=0.35'
+			);
+
+			// 3. EACH LIST ITEM APPEARS ONE BY ONE!
+			const featRows = card.querySelectorAll('.k-feat-row');
+			if (featRows.length > 0) {
+				cardTl.fromTo(featRows,
+					{ opacity: 0, x: -25 },
+					{ opacity: 1, x: 0, duration: 0.45, stagger: 0.12, ease: 'power2.out' },
+					'-=0.15'
+				);
+
+				// Checkmark pop bounce on each list item
+				cardTl.fromTo(card.querySelectorAll('.k-feat-row svg'),
+					{ scale: 0, opacity: 0 },
+					{ scale: 1, opacity: 1, duration: 0.35, stagger: 0.12, ease: 'back.out(2)' },
+					'<' // synchronized with the row slide!
+				);
+			}
+
+			// 4. CTA Button at bottom
+			const ctaBtn = card.querySelector('.k-pricing-btn');
+			if (ctaBtn) {
+				cardTl.fromTo(ctaBtn,
+					{ opacity: 0, y: 15 },
+					{ opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' },
+					'-=0.2'
+				);
+			}
 		});
 	} else {
 		document.querySelectorAll('.k-pricing-card').forEach(c => {
 			c.style.opacity = '1';
 			c.style.transform = 'none';
+		});
+		document.querySelectorAll('.k-feat-row').forEach(f => {
+			f.style.opacity = '1';
+			f.style.transform = 'none';
 		});
 	}
 });
@@ -1084,4 +1129,145 @@ document.addEventListener('DOMContentLoaded', () => {
 			startAutoplay();
 		}
 	});
+});
+
+/* ============================================================
+ * NAVBAR: Transparent over hero, frosted glass when scrolled past
+ * ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+	const dock = document.querySelector('.k-floating-dock');
+	const hero = document.querySelector('.k-hero-monolith');
+
+	if (dock && hero) {
+		function checkScroll() {
+			const heroBottom = hero.getBoundingClientRect().bottom;
+			if (heroBottom <= 80) {
+				dock.classList.add('is-scrolled');
+			} else {
+				dock.classList.remove('is-scrolled');
+			}
+		}
+
+		window.addEventListener('scroll', checkScroll, { passive: true });
+		checkScroll();
+	}
+});
+
+/* ============================================================
+ * SVG DRAW ANIMATION: Reset stroke offsets when column changes
+ * so the draw animation replays every time a column is activated
+ * ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+	const cols = document.querySelectorAll('.k-mono-col');
+
+	if (cols.length > 0) {
+		// Observe class changes on each column
+		const observer = new MutationObserver((mutations) => {
+			mutations.forEach((mutation) => {
+				const col = mutation.target;
+				if (col.classList.contains('is-active')) {
+					// Reset all SVG strokes in this column to trigger the draw animation
+					const shapes = col.querySelectorAll('.k-svg-art line, .k-svg-art rect, .k-svg-art circle, .k-svg-art path, .k-svg-art polygon, .k-svg-art polyline');
+					shapes.forEach((shape) => {
+						// Force reset: remove transition, set offset to 600, reflow, then restore
+						shape.style.transition = 'none';
+						shape.style.strokeDashoffset = '600';
+						// eslint-disable-next-line no-unused-expressions
+						shape.offsetWidth; // Force reflow
+						shape.style.transition = '';
+						shape.style.strokeDashoffset = '';
+					});
+				}
+			});
+		});
+
+		cols.forEach((col) => {
+			observer.observe(col, { attributes: true, attributeFilter: ['class'] });
+		});
+	}
+});
+
+/* ============================================================
+ * UNIVERSAL WEBSITE-WIDE STAGGERED SCROLL ANIMATIONS
+ * Everything appears one by one sequentially across all sections
+ * ============================================================ */
+window.addEventListener('load', () => {
+	if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+	gsap.registerPlugin(ScrollTrigger);
+
+	// 1. All Section Headers: Stagger badge -> heading -> subtitle
+	const sectionHeaders = document.querySelectorAll(
+		'.k-work-header, .k-runway-header, .k-vmatrix-header, .k-pricing-header, .k-bubble-header, .k-faq-header, .k-terminal-header'
+	);
+	sectionHeaders.forEach((header) => {
+		const children = header.children;
+		if (children.length > 0) {
+			gsap.fromTo(children,
+				{ opacity: 0, y: 35 },
+				{
+					opacity: 1,
+					y: 0,
+					duration: 0.7,
+					stagger: 0.15,
+					ease: 'power3.out',
+					scrollTrigger: {
+						trigger: header,
+						start: 'top 85%',
+						toggleActions: 'play none none none'
+					}
+				}
+			);
+		}
+	});
+
+	// 2. Terminal Section: Terminal window and contact columns stagger
+	const termSection = document.querySelector('.k-terminal-section');
+	if (termSection) {
+		const termCols = termSection.querySelectorAll('.k-term-col, .k-contact-direct-line, .k-terminal-window');
+		if (termCols.length > 0) {
+			gsap.fromTo(termCols,
+				{ opacity: 0, y: 40 },
+				{
+					opacity: 1,
+					y: 0,
+					duration: 0.75,
+					stagger: 0.18,
+					ease: 'power3.out',
+					scrollTrigger: {
+						trigger: termSection,
+						start: 'top 75%',
+						toggleActions: 'play none none none'
+					}
+				}
+			);
+		}
+	}
+
+	// 3. Footer Elements Stagger
+	const footer = document.getElementById('site-footer');
+	if (footer) {
+		const footerBlocks = footer.querySelectorAll('.k-footer-block, .k-footer-col, .k-footer-bottom');
+		if (footerBlocks.length > 0) {
+			gsap.fromTo(footerBlocks,
+				{ opacity: 0, y: 30 },
+				{
+					opacity: 1,
+					y: 0,
+					duration: 0.65,
+					stagger: 0.12,
+					ease: 'power2.out',
+					scrollTrigger: {
+						trigger: footer,
+						start: 'top 90%',
+						toggleActions: 'play none none none'
+					}
+				}
+			);
+		}
+	}
+
+	// Refresh ScrollTrigger once everything is mounted
+	setTimeout(() => {
+		ScrollTrigger.refresh();
+	}, 200);
 });

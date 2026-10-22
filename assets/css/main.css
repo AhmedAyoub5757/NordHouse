@@ -66,10 +66,19 @@ body {
 .k-dock-brand,
 .k-trigger-btn {
 	pointer-events: auto;
+	background: transparent;
+	backdrop-filter: none;
+	border: 1px solid transparent;
+	padding: 0.85rem 1.5rem;
+	transition: background-color 0.4s ease, backdrop-filter 0.4s ease, border-color 0.4s ease;
+}
+
+/* When scrolled past hero, restore subtle bg for legibility */
+.k-floating-dock.is-scrolled .k-dock-brand,
+.k-floating-dock.is-scrolled .k-trigger-btn {
 	background: rgba(12, 12, 15, 0.85);
 	backdrop-filter: blur(12px);
 	border: 1px solid var(--k-border);
-	padding: 0.85rem 1.5rem;
 }
 
 .k-dock-brand {
@@ -102,7 +111,7 @@ body {
 }
 
 .k-trigger-btn:hover {
-	border-color: var(--k-accent);
+	border-color: rgba(204, 255, 0, 0.3);
 	background: rgba(204, 255, 0, 0.05);
 }
 
@@ -327,7 +336,7 @@ body {
 
 .k-hero-monolith {
 	width: 100%;
-	height: calc(100vh - 80px);
+	height: 100vh;
 	min-height: 650px;
 	background-color: var(--hero-bg);
 	position: relative;
@@ -440,22 +449,27 @@ body {
 
 .k-col-expanded {
 	position: absolute;
-	inset: 0;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	width: clamp(520px, 45vw, 680px);
+	max-width: none;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-	padding: 4rem;
+	padding: 3.5rem 3rem;
 	opacity: 0;
-	transform: translateY(30px);
+	transform: translateX(-15px);
 	pointer-events: none;
-	transition: opacity 0.5s ease 0.25s, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1) 0.25s;
+	transition: opacity 0.12s ease 0s, transform 0.12s ease 0s;
 	z-index: 3;
 }
 
 .k-mono-col.is-active .k-col-expanded {
 	opacity: 1;
-	transform: translateY(0);
+	transform: translateX(0);
 	pointer-events: auto;
+	transition: opacity 0.45s ease 0.2s, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1) 0.2s;
 }
 
 /* Expanded Header */
@@ -559,22 +573,11 @@ body {
 
 .k-exp-btn {
 	display: inline-flex;
-	align-items: center;
-	gap: 1rem;
-	padding: 1rem 2rem;
-	background: var(--hero-accent);
-	color: #000;
-	font-weight: 800;
-	font-size: 0.85rem;
+	position: relative;
 	text-decoration: none;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-	transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.k-exp-btn:hover {
-	background-color: #ffffff;
-	transform: translateX(6px);
+	border: none;
+	padding: 0;
+	background: transparent;
 }
 
 /* RESPONSIVE LAYOUT (TABLET & MOBILE) */
@@ -2038,7 +2041,7 @@ body.cursor-hover .k-cursor-follower {
 	width: 100%;
 	padding: 8rem 4rem;
 	background-color: #060608;
-	border-bottom: 2px solid #1c1c28;
+	border-bottom: none;
 	position: relative;
 }
 
@@ -2410,7 +2413,6 @@ body {
 	position: relative;
 	z-index: 2; /* Content slides over the fixed footer */
 	background-color: #060608;
-	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95);
 }
 
 .k-footer-reveal {
@@ -2418,7 +2420,7 @@ body {
 	z-index: 1;
 	width: 100%;
 	background-color: #040406;
-	border-top: 2px solid #1c1c28;
+	border-top: none;
 	padding: 7rem 2rem 2rem 2rem;
 	overflow: hidden;
 }
@@ -2749,7 +2751,7 @@ body {
 
 .k-hero-monolith {
 	width: 100%;
-	height: calc(100vh - 80px);
+	height: 100vh;
 	min-height: 650px;
 	background-color: var(--hero-bg);
 	position: relative;
@@ -2969,22 +2971,28 @@ body {
 
 .k-col-expanded {
 	position: absolute;
-	inset: 0;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	width: clamp(520px, 45vw, 680px);
+	max-width: none;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-	padding: 4rem;
+	padding: 3.5rem 3rem;
 	opacity: 0;
-	transform: translateY(30px);
+	transform: translateX(-15px);
 	pointer-events: none;
-	transition: opacity 0.6s ease 0.25s, transform 0.6s var(--ease-premium) 0.25s;
+	/* On close: instantly fade out with zero delay so column never looks squeezed during contraction */
+	transition: opacity 0.12s ease 0s, transform 0.12s ease 0s;
 	z-index: 3;
 }
 
 .k-mono-col.is-active .k-col-expanded {
 	opacity: 1;
-	transform: translateY(0);
+	transform: translateX(0);
 	pointer-events: auto;
+	transition: opacity 0.45s ease 0.2s, transform 0.5s var(--ease-premium) 0.2s;
 }
 
 .k-exp-header {
@@ -3003,21 +3011,24 @@ body {
 }
 
 .k-exp-title {
-	font-size: 2.8vw;
+	font-size: clamp(2rem, 2.5vw, 3.2rem);
 	font-weight: 900;
 	color: #fff;
 	letter-spacing: -0.03em;
 	text-transform: uppercase;
 	text-shadow: 0 2px 30px rgba(0, 0, 0, 0.6);
+	white-space: nowrap;
 }
 
 .k-exp-tagline {
-	font-size: 1.15rem;
+	font-size: 1.05rem;
 	color: #d4d4db;
-	max-width: 600px;
+	width: 100%;
+	max-width: 540px;
 	line-height: 1.5;
-	margin-top: 1.5rem;
+	margin-top: 1.25rem;
 	text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5);
+	white-space: normal;
 }
 
 .k-exp-body {
@@ -3061,12 +3072,91 @@ body {
 	align-items: center;
 	justify-content: center;
 	animation: kFloat 4s ease-in-out infinite alternate;
-	opacity: 0.85;
+	opacity: 0.95;
 }
 
 @keyframes kFloat {
 	0% { transform: translateY(0px); }
 	100% { transform: translateY(-10px); }
+}
+
+.k-svg-art {
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+/* Continuous Draw Keyframes */
+@keyframes kContinuousPathDraw {
+	0% {
+		stroke-dasharray: 450;
+		stroke-dashoffset: 450;
+		opacity: 0.3;
+	}
+	42% {
+		stroke-dasharray: 450;
+		stroke-dashoffset: 0;
+		opacity: 1;
+	}
+	68% {
+		stroke-dasharray: 450;
+		stroke-dashoffset: 0;
+		opacity: 1;
+	}
+	100% {
+		stroke-dasharray: 450;
+		stroke-dashoffset: -450;
+		opacity: 0.3;
+	}
+}
+
+@keyframes kContinuousLaserFlow {
+	0% {
+		stroke-dashoffset: 160;
+	}
+	100% {
+		stroke-dashoffset: -160;
+	}
+}
+
+@keyframes kCursorBlink {
+	0%, 49% { opacity: 1; }
+	50%, 100% { opacity: 0; }
+}
+
+@keyframes kWavePulse {
+	0%, 100% {
+		transform: scale(1);
+		opacity: 0.65;
+	}
+	50% {
+		transform: scale(1.35);
+		opacity: 1;
+		filter: drop-shadow(0 0 8px var(--hero-accent));
+	}
+}
+
+.k-anim-path {
+	stroke-dasharray: 450;
+	stroke-dashoffset: 0;
+}
+
+.k-mono-col.is-active .k-anim-path {
+	animation: kContinuousPathDraw 5s ease-in-out infinite;
+}
+
+.k-laser-flow {
+	stroke-dasharray: 24 8;
+	animation: kContinuousLaserFlow 2s linear infinite;
+}
+
+.k-cursor-blink {
+	animation: kCursorBlink 0.9s steps(1) infinite;
+}
+
+.k-wave-pulse {
+	transform-origin: center;
+	animation: kWavePulse 2s ease-in-out infinite;
 }
 
 .k-spin-ring {
@@ -3078,13 +3168,12 @@ body {
 	100% { transform: rotate(360deg); }
 }
 
-.k-svg-art {
-	width: 100%;
-	height: 100%;
+.k-mono-col.is-active .k-exp-illustration {
+	filter: drop-shadow(0 0 24px rgba(204, 255, 0, 0.22));
 }
 
 /* ============================================================
-   CTA — MAGNETIC BUTTON
+   CTA — MAGNETIC BUTTON (SINGLE BORDER ONLY)
    ============================================================ */
 .k-exp-footer {
 	border-top: 1px solid rgba(255, 255, 255, 0.12);
@@ -3095,34 +3184,42 @@ body {
 	display: inline-flex;
 	position: relative;
 	text-decoration: none;
+	border: none !important;
+	padding: 0 !important;
+	background: transparent !important;
 	will-change: transform;
 }
 
 .k-magnetic-inner {
 	display: inline-flex;
 	align-items: center;
-	gap: 1rem;
-	padding: 1rem 2rem;
-	background: var(--hero-accent);
-	color: #000;
-	font-weight: 800;
-	font-size: 0.85rem;
-	letter-spacing: 0.08em;
+	gap: 0.65rem;
+	padding: 0.65rem 1.4rem;
+	background: transparent;
+	border: 1px solid var(--hero-accent);
+	color: var(--hero-accent);
+	font-weight: 700;
+	font-size: 0.72rem;
+	letter-spacing: 0.1em;
 	text-transform: uppercase;
-	transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.k-exp-btn:hover .k-magnetic-inner {
-	background-color: #ffffff;
-	box-shadow: 0 10px 30px rgba(204, 255, 0, 0.25);
+	transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .k-magnetic-inner svg {
+	width: 14px;
+	height: 14px;
 	transition: transform 0.3s ease;
+}
+
+.k-exp-btn:hover .k-magnetic-inner {
+	background-color: var(--hero-accent);
+	color: #000;
+	box-shadow: 0 6px 20px rgba(204, 255, 0, 0.2);
 }
 
 .k-exp-btn:hover .k-magnetic-inner svg {
 	transform: translateX(4px);
+	color: #000;
 }
 
 /* ============================================================
@@ -3168,6 +3265,11 @@ body {
 		position: relative;
 		inset: auto;
 		padding: 2.5rem 1.5rem;
+		min-width: 0;
+	}
+
+	.k-exp-tagline {
+		white-space: normal;
 	}
 
 	.k-exp-title {
