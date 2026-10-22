@@ -10,9 +10,11 @@
 
 <header class="site-header">
 	<div class="header-container">
-		<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="brand-logo">
-			<?php bloginfo( 'name' ); ?><span>.</span>
-		</a>
+		<!-- <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="brand-logo">
+			<?php 
+			// bloginfo( 'name' ); 
+			?><span>.</span>
+		</a> -->
 		<nav class="main-navigation">
 			<?php
 			wp_nav_menu( array(

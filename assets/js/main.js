@@ -852,3 +852,65 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+
+	// 1. REAL-TIME TIMEZONE CLOCK (PKT)
+	const clockEl = document.getElementById('kFooterClock');
+	if (clockEl) {
+		function updateClock() {
+			const now = new Date();
+			const options = { timeZone: 'Asia/Karachi', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+			clockEl.textContent = now.toLocaleTimeString('en-US', options);
+		}
+		updateClock();
+		setInterval(updateClock, 1000);
+	}
+
+	// 2. FOOTER REVEAL & WORDMARK SCALING ANIMATION
+	const footer = document.getElementById('site-footer');
+	const mainContent = document.getElementById('content') || document.querySelector('.site-content-wrapper');
+
+	if (footer && mainContent && window.innerWidth > 991) {
+		
+		function setFooterHeight() {
+			const footerHeight = footer.offsetHeight;
+			mainContent.style.marginBottom = `${footerHeight}px`;
+		}
+
+		setFooterHeight();
+		window.addEventListener('resize', setFooterHeight);
+
+		// GSAP ScrollTrigger Unfold Reveal & Wordmark Scale
+		if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+			gsap.registerPlugin(ScrollTrigger);
+
+			footer.style.position = 'fixed';
+			footer.style.bottom = '0';
+			footer.style.left = '0';
+
+			const footerTl = gsap.timeline({
+				scrollTrigger: {
+					trigger: mainContent,
+					start: 'bottom bottom',
+					end: 'bottom top',
+					scrub: true
+				}
+			});
+
+			// Unfold reveal transition
+			footerTl.from(footer, {
+				y: '25%',
+				opacity: 0.6,
+				ease: 'none'
+			});
+
+			// Scale wordmark text slightly as it reveals
+			footerTl.from('.k-wordmark-text-path', {
+				scale: 0.9,
+				transformOrigin: 'center center',
+				ease: 'none'
+			}, 0);
+		}
+	}
+});
