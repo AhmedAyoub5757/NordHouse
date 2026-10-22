@@ -408,3 +408,224 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+
+	// VISUAL MATRIX SEQUENTIAL STAGGER REVEAL
+	if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+		gsap.registerPlugin(ScrollTrigger);
+
+		gsap.to('.k-vmatrix-row', {
+			opacity: 1,
+			y: 0,
+			duration: 0.7,
+			stagger: 0.15,
+			ease: 'power3.out',
+			scrollTrigger: {
+				trigger: '.k-vmatrix-grid',
+				start: 'top 80%',
+				toggleActions: 'play none none none'
+			}
+		});
+	} else {
+		document.querySelectorAll('.k-vmatrix-row').forEach(row => {
+			row.style.opacity = '1';
+			row.style.transform = 'none';
+		});
+	}
+});
+
+
+document.addEventListener('DOMContentLoaded', () => {
+
+	// 1. INTERACTIVE PRICE MORPHING ANIMATION
+	const toggleBtn = document.getElementById('kBillingToggle');
+	const labelOnce = document.getElementById('kLabelOnce');
+	const labelRetainer = document.getElementById('kLabelRetainer');
+	const pricesOnce = document.querySelectorAll('.k-val-once');
+	const pricesRetainer = document.querySelectorAll('.k-val-retainer');
+	const subLabels = document.querySelectorAll('#kPriceSubLabel');
+
+	function animateToggle(isRetainer) {
+		if (typeof gsap !== 'undefined') {
+			const activeHide = isRetainer ? pricesOnce : pricesRetainer;
+			const activeShow = isRetainer ? pricesRetainer : pricesOnce;
+
+			// Slide out current prices
+			gsap.to(activeHide, {
+				y: -20,
+				opacity: 0,
+				duration: 0.25,
+				ease: 'power2.in',
+				onComplete: () => {
+					activeHide.forEach(p => p.style.display = 'none');
+					
+					// Prepare & slide in new prices
+					activeShow.forEach(p => p.style.display = 'block');
+					gsap.fromTo(activeShow, 
+						{ y: 20, opacity: 0 },
+						{ y: 0, opacity: 1, duration: 0.35, ease: 'power3.out' }
+					);
+				}
+			});
+
+			// Fade sub labels
+			gsap.to(subLabels, {
+				opacity: 0,
+				duration: 0.2,
+				onComplete: () => {
+					subLabels.forEach(lbl => {
+						lbl.textContent = isRetainer ? '// MONTHLY DEDICATED SPRINT' : '// FIXED DELIVERABLE';
+					});
+					gsap.to(subLabels, { opacity: 1, duration: 0.2 });
+				}
+			});
+
+		} else {
+			// Fallback switch
+			if (isRetainer) {
+				pricesOnce.forEach(p => p.style.display = 'none');
+				pricesRetainer.forEach(p => p.style.display = 'block');
+			} else {
+				pricesRetainer.forEach(p => p.style.display = 'none');
+				pricesOnce.forEach(p => p.style.display = 'block');
+			}
+		}
+	}
+
+	if (toggleBtn) {
+		toggleBtn.addEventListener('click', () => {
+			toggleBtn.classList.toggle('is-active');
+			const isRetainer = toggleBtn.classList.contains('is-active');
+
+			if (isRetainer) {
+				labelOnce.classList.remove('active');
+				labelRetainer.classList.add('active');
+			} else {
+				labelRetainer.classList.remove('active');
+				labelOnce.classList.add('active');
+			}
+
+			animateToggle(isRetainer);
+		});
+
+		// Allow direct text clicking
+		if (labelOnce && labelRetainer) {
+			labelOnce.addEventListener('click', () => {
+				if (toggleBtn.classList.contains('is-active')) {
+					toggleBtn.classList.remove('is-active');
+					labelRetainer.classList.remove('active');
+					labelOnce.classList.add('active');
+					animateToggle(false);
+				}
+			});
+
+			labelRetainer.addEventListener('click', () => {
+				if (!toggleBtn.classList.contains('is-active')) {
+					toggleBtn.classList.add('is-active');
+					labelOnce.classList.remove('active');
+					labelRetainer.classList.add('active');
+					animateToggle(true);
+				}
+			});
+		}
+	}
+
+	// 2. PRICING CARDS & FEATURE LIST GSAP STAGGER REVEAL
+	if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+		gsap.registerPlugin(ScrollTrigger);
+
+		// Card staggered rise
+		gsap.to('.k-pricing-card', {
+			opacity: 1,
+			y: 0,
+			duration: 0.8,
+			stagger: 0.2,
+			ease: 'power3.out',
+			scrollTrigger: {
+				trigger: '.k-pricing-grid',
+				start: 'top 75%',
+				toggleActions: 'play none none none'
+			}
+		});
+
+		// Stagger feature rows within each card
+		document.querySelectorAll('.k-pricing-card').forEach(card => {
+			gsap.from(card.querySelectorAll('.k-feat-row'), {
+				opacity: 0,
+				x: -15,
+				duration: 0.5,
+				stagger: 0.08,
+				ease: 'power2.out',
+				scrollTrigger: {
+					trigger: card,
+					start: 'top 80%'
+				}
+			});
+		});
+	} else {
+		document.querySelectorAll('.k-pricing-card').forEach(c => {
+			c.style.opacity = '1';
+			c.style.transform = 'none';
+		});
+	}
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+
+	// BUBBLE TESTIMONIALS PHYSICS & HOVER FOCUS
+	const bubblesContainer = document.querySelector('.k-bubbles-container');
+	const bubbles = document.querySelectorAll('.k-bubble-card');
+
+	if (bubbles.length > 0) {
+		
+		// GSAP Stagger Reveal & Floating Physics Loop
+		if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+			gsap.registerPlugin(ScrollTrigger);
+
+			// 1. Initial Stagger Reveal
+			gsap.to('.k-bubble-card', {
+				opacity: 1,
+				scale: 1,
+				duration: 0.8,
+				stagger: 0.15,
+				ease: 'power3.out',
+				scrollTrigger: {
+					trigger: '.k-bubble-section',
+					start: 'top 70%',
+					toggleActions: 'play none none none'
+				},
+				onComplete: () => {
+					// 2. Continuous Organic Bobbing Float Effect
+					if (window.innerWidth > 991) {
+						bubbles.forEach((b, index) => {
+							gsap.to(b, {
+								y: (index % 2 === 0 ? '-=15' : '+=15'),
+								x: (index % 3 === 0 ? '+=10' : '-=10'),
+								duration: 2.5 + (index * 0.4),
+								repeat: -1,
+								yoyo: true,
+								ease: 'sine.inOut'
+							});
+						});
+					}
+				}
+			});
+		} else {
+			bubbles.forEach(b => b.style.opacity = '1');
+		}
+
+		// 3. Hover Focus Isolation Logic
+		if (bubblesContainer) {
+			bubbles.forEach(bubble => {
+				bubble.addEventListener('mouseenter', () => {
+					bubblesContainer.classList.add('has-hover');
+				});
+
+				bubble.addEventListener('mouseleave', () => {
+					bubblesContainer.classList.remove('has-hover');
+				});
+			});
+		}
+	}
+});
