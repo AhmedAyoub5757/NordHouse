@@ -629,3 +629,84 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	}
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+
+	// 1. FAQ ACCORDION EXPAND & TOGGLE LOGIC
+	const faqItems = document.querySelectorAll('.k-faq-item');
+
+	faqItems.forEach(item => {
+		const btn = item.querySelector('.k-faq-question-btn');
+		const body = item.querySelector('.k-faq-answer-body');
+		const inner = item.querySelector('.k-faq-answer-inner');
+
+		// Set initial height for pre-opened item
+		if (item.classList.contains('is-open') && body && inner) {
+			body.style.height = `${inner.offsetHeight}px`;
+		}
+
+		if (btn && body && inner) {
+			btn.addEventListener('click', () => {
+				const isOpen = item.classList.contains('is-open');
+
+				// Close all other accordions
+				faqItems.forEach(other => {
+					other.classList.remove('is-open');
+					const otherBody = other.querySelector('.k-faq-answer-body');
+					if (otherBody) otherBody.style.height = '0px';
+				});
+
+				// Toggle current
+				if (!isOpen) {
+					item.classList.add('is-open');
+					body.style.height = `${inner.offsetHeight}px`;
+				} else {
+					item.classList.remove('is-open');
+					body.style.height = '0px';
+				}
+			});
+		}
+	});
+
+	// 2. FAQ INSTANT SEARCH FILTER
+	const searchInput = document.getElementById('kFaqSearchInput');
+	if (searchInput) {
+		searchInput.addEventListener('input', (e) => {
+			const term = e.target.value.toLowerCase().trim();
+
+			faqItems.forEach(item => {
+				const qText = item.querySelector('.k-faq-q-text').textContent.toLowerCase();
+				const aText = item.querySelector('.k-faq-answer-inner p').textContent.toLowerCase();
+
+				if (qText.includes(term) || aText.includes(term)) {
+					item.style.display = 'block';
+				} else {
+					item.style.display = 'none';
+				}
+			});
+		});
+	}
+
+	// 3. GSAP STAGGER REVEAL FOR FAQ ROWS
+	if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+		gsap.registerPlugin(ScrollTrigger);
+
+		gsap.to('.k-faq-item', {
+			opacity: 1,
+			y: 0,
+			duration: 0.8,
+			stagger: 0.15,
+			ease: 'power3.out',
+			scrollTrigger: {
+				trigger: '.k-faq-accordion-list',
+				start: 'top 75%',
+				toggleActions: 'play none none none'
+			}
+		});
+	} else {
+		faqItems.forEach(f => {
+			f.style.opacity = '1';
+			f.style.transform = 'none';
+		});
+	}
+});
