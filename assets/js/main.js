@@ -1459,3 +1459,316 @@ document.addEventListener('DOMContentLoaded', () => {
 	initHeadlineRotator();
 	initKineticHeroThreeDual();
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+
+	// BEFORE / AFTER SPLIT SMOOTH DRAG ENGINE
+	const container = document.getElementById('kBAContainer');
+	const beforeLayer = document.getElementById('kBABeforeLayer');
+	const handle = document.getElementById('kBAHandle');
+
+	if (container && beforeLayer && handle) {
+		let isDragging = false;
+		let targetPercentage = 50;
+		let currentPercentage = 50;
+
+		function setSplitPosition(pct) {
+			targetPercentage = Math.max(0, Math.min(100, pct));
+		}
+
+		function updateAnimation() {
+			// Physics easing lerp
+			currentPercentage += (targetPercentage - currentPercentage) * 0.15;
+			
+			beforeLayer.style.width = `${currentPercentage}%`;
+			handle.style.left = `${currentPercentage}%`;
+
+			requestAnimationFrame(updateAnimation);
+		}
+
+		updateAnimation();
+
+		function getMousePos(e) {
+			const rect = container.getBoundingClientRect();
+			const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+			return (x / rect.width) * 100;
+		}
+
+		container.addEventListener('mousedown', (e) => {
+			isDragging = true;
+			setSplitPosition(getMousePos(e));
+		});
+
+		container.addEventListener('touchstart', (e) => {
+			isDragging = true;
+			setSplitPosition(getMousePos(e));
+		});
+
+		window.addEventListener('mousemove', (e) => {
+			if (isDragging) setSplitPosition(getMousePos(e));
+		});
+
+		window.addEventListener('touchmove', (e) => {
+			if (isDragging) setSplitPosition(getMousePos(e));
+		});
+
+		window.addEventListener('mouseup', () => isDragging = false);
+		window.addEventListener('touchend', () => isDragging = false);
+	}
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+
+	const frame = document.getElementById('kBaFrame');
+	const afterLayer = document.querySelector('.k-ba-after');
+	const handle = document.getElementById('kBaHandle');
+
+	if (frame && afterLayer && handle) {
+		let isDragging = false;
+
+		function updateSplit(clientX) {
+			const rect = frame.getBoundingClientRect();
+			let x = clientX - rect.left;
+			x = Math.max(0, Math.min(x, rect.width));
+			const percentage = (x / rect.width) * 100;
+
+			afterLayer.style.width = `${percentage}%`;
+			handle.style.left = `${percentage}%`;
+		}
+
+		frame.addEventListener('mousedown', (e) => {
+			isDragging = true;
+			updateSplit(e.clientX);
+		});
+
+		window.addEventListener('mousemove', (e) => {
+			if (!isDragging) return;
+			updateSplit(e.clientX);
+		});
+
+		window.addEventListener('mouseup', () => {
+			isDragging = false;
+		});
+
+		// Touch Support for Mobile
+		frame.addEventListener('touchstart', (e) => {
+			isDragging = true;
+			updateSplit(e.touches[0].clientX);
+		});
+
+		window.addEventListener('touchmove', (e) => {
+			if (!isDragging) return;
+			updateSplit(e.touches[0].clientX);
+		});
+
+		window.addEventListener('touchend', () => {
+			isDragging = false;
+		});
+	}
+});
+
+/**
+ * Kinetic Before/After Widget — interaction script
+ * Pure JS + GSAP. Drag (mouse/touch) or hover to reveal the
+ * "After" layer across the "Before" layer via a clip-path wipe.
+ */
+( function () {
+	'use strict';
+
+	function initInstance( frame ) {
+		var afterPanel = frame.querySelector( '[data-kba-panel="after"]' );
+		var handle      = frame.querySelector( '[data-kba-handle]' );
+		if ( ! afterPanel || ! handle ) {
+			return;
+		}
+
+		var hasGsap = typeof window.gsap !== 'undefined';
+		var isDragging = false;
+		var currentPercent = 50;
+		var rafPending = false;
+
+		// Respect reduced-motion preference for the ambient/eased updates.
+		var prefersReducedMotion = window.matchMedia &&
+			window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
+
+		function setPosition( percent, animate ) {
+			percent = Math.max( 0, Math.min( 100, percent ) );
+			currentPercent = percent;
+
+			var clipRight = 100 - percent;
+			var clipValue = 'inset(0 ' + clipRight + '% 0 0)';
+
+			if ( hasGsap && animate && ! prefersReducedMotion ) {
+				gsap.to( afterPanel, {
+					clipPath: clipValue,
+					duration: 0.5,
+					ease: 'power3.out',
+					overwrite: true,
+				} );
+				gsap.to( handle, {
+					left: percent + '%',
+					duration: 0.5,
+					ease: 'power3.out',
+					overwrite: true,
+				} );
+			} else {
+				afterPanel.style.clipPath = clipValue;
+				handle.style.left = percent + '%';
+			}
+		}
+
+		function percentFromClientX( clientX ) {
+			var rect = frame.getBoundingClientRect();
+			var x = clientX - rect.left;
+			return ( x / rect.width ) * 100;
+		}
+
+		function scheduleUpdate( percent, animate ) {
+			if ( rafPending ) {
+				return;
+			}
+			rafPending = true;
+			requestAnimationFrame( function () {
+				setPosition( percent, animate );
+				rafPending = false;
+			} );
+		}
+
+		/* ---------------- Drag (pointer) interaction ---------------- */
+
+		function onPointerDown( e ) {
+			isDragging = true;
+			frame.classList.add( 'is-dragging' );
+			onPointerMove( e );
+			window.addEventListener( 'pointermove', onPointerMove, { passive: true } );
+			window.addEventListener( 'pointerup', onPointerUp, { passive: true } );
+		}
+
+		function onPointerMove( e ) {
+			if ( ! isDragging ) {
+				return;
+			}
+			var clientX = e.clientX;
+			if ( typeof clientX === 'undefined' && e.touches && e.touches[ 0 ] ) {
+				clientX = e.touches[ 0 ].clientX;
+			}
+			scheduleUpdate( percentFromClientX( clientX ), false );
+		}
+
+		function onPointerUp() {
+			isDragging = false;
+			frame.classList.remove( 'is-dragging' );
+			window.removeEventListener( 'pointermove', onPointerMove );
+			window.removeEventListener( 'pointerup', onPointerUp );
+		}
+
+		handle.addEventListener( 'pointerdown', onPointerDown );
+		frame.addEventListener( 'pointerdown', function ( e ) {
+			// Allow clicking/tapping anywhere in the frame to start the drag.
+			onPointerDown( e );
+		} );
+
+		/* ---------------- Hover interaction (desktop, non-touch) ---------------- */
+
+		var isTouchDevice = window.matchMedia &&
+			window.matchMedia( '(hover: none), (pointer: coarse)' ).matches;
+
+		if ( ! isTouchDevice ) {
+			frame.addEventListener( 'mousemove', function ( e ) {
+				if ( isDragging ) {
+					return; // dragging already handles this with higher precision.
+				}
+				scheduleUpdate( percentFromClientX( e.clientX ), true );
+			} );
+
+			frame.addEventListener( 'mouseleave', function () {
+				scheduleUpdate( 50, true );
+			} );
+		}
+
+		/* ---------------- Keyboard accessibility ---------------- */
+
+		handle.setAttribute( 'tabindex', '0' );
+		handle.setAttribute( 'role', 'slider' );
+		handle.setAttribute( 'aria-label', 'Before and after comparison slider' );
+		handle.setAttribute( 'aria-valuemin', '0' );
+		handle.setAttribute( 'aria-valuemax', '100' );
+
+		handle.addEventListener( 'keydown', function ( e ) {
+			var step = 5;
+			if ( e.key === 'ArrowLeft' ) {
+				scheduleUpdate( currentPercent - step, true );
+				e.preventDefault();
+			} else if ( e.key === 'ArrowRight' ) {
+				scheduleUpdate( currentPercent + step, true );
+				e.preventDefault();
+			}
+		} );
+
+		/* ---------------- Reveal-on-scroll entrance (GSAP) ---------------- */
+
+		if ( hasGsap && ! prefersReducedMotion ) {
+			gsap.set( frame, { opacity: 0, y: 24 } );
+
+			var revealFrame = function () {
+				gsap.to( frame, {
+					opacity: 1,
+					y: 0,
+					duration: 0.8,
+					ease: 'power3.out',
+				} );
+			};
+
+			if ( 'IntersectionObserver' in window ) {
+				var observer = new IntersectionObserver(
+					function ( entries ) {
+						entries.forEach( function ( entry ) {
+							if ( entry.isIntersecting ) {
+								revealFrame();
+								observer.unobserve( entry.target );
+							}
+						} );
+					},
+					{ threshold: 0.25 }
+				);
+				observer.observe( frame );
+			} else {
+				revealFrame();
+			}
+		}
+
+		// Initialize at 50/50.
+		setPosition( 50, false );
+
+		// Keep aria-valuenow in sync.
+		var updateAria = function () {
+			handle.setAttribute( 'aria-valuenow', Math.round( currentPercent ) );
+			requestAnimationFrame( updateAria );
+		};
+		requestAnimationFrame( updateAria );
+	}
+
+	function initAll() {
+		var frames = document.querySelectorAll( '[data-kba-frame]' );
+		frames.forEach( initInstance );
+	}
+
+	if ( document.readyState === 'loading' ) {
+		document.addEventListener( 'DOMContentLoaded', initAll );
+	} else {
+		initAll();
+	}
+
+	// Re-init when Elementor editor rebuilds the widget (editor preview only).
+	if ( window.elementorFrontend && window.elementorFrontend.hooks ) {
+		window.elementorFrontend.hooks.addAction(
+			'frontend/element_ready/kinetic-before-after.default',
+			function ( $scope ) {
+				var frame = $scope[ 0 ].querySelector( '[data-kba-frame]' );
+				if ( frame ) {
+					initInstance( frame );
+				}
+			}
+		);
+	}
+} )();

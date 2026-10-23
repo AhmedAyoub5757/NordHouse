@@ -3550,3 +3550,841 @@ body {
 		gap: 1rem;
 	}
 }
+
+/* BEFORE / AFTER VISUAL SPLIT STYLING */
+.k-before-after-section {
+	width: 100%;
+	padding: 8rem 4rem;
+	background-color: #050507;
+	border-bottom: 2px solid #1c1c28;
+	position: relative;
+}
+
+.k-ba-header {
+	text-align: center;
+	margin-bottom: 4rem;
+}
+
+.k-ba-h2 {
+	font-size: 3.8vw;
+	font-weight: 900;
+	text-transform: uppercase;
+	letter-spacing: -0.04em;
+	color: #fff;
+	line-height: 0.95;
+	margin: 0.5rem 0 0 0;
+}
+
+.k-ba-h2 span {
+	color: var(--hero-accent, #ccff00);
+}
+
+/* Interactive Frame */
+.k-ba-container {
+	position: relative;
+	width: 100%;
+	max-width: 1280px;
+	height: 680px;
+	margin: 0 auto;
+	overflow: hidden;
+	border: 1px solid #1c1c28;
+	background: #000;
+	user-select: none;
+	cursor: ew-resize;
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+}
+
+.k-ba-layer {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.k-ba-layer img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	pointer-events: none;
+}
+
+.k-ba-before {
+	width: 50%;
+	overflow: hidden;
+	z-index: 2;
+	border-right: 2px solid var(--hero-accent, #ccff00);
+}
+
+.k-ba-before img {
+	width: 1280px; /* Locked width to prevent distortion on clip */
+	max-width: none;
+}
+
+/* Floating Status Pills */
+.k-ba-tag {
+	position: absolute;
+	top: 1.5rem;
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	padding: 0.5rem 1rem;
+	font-family: 'Courier New', Courier, monospace;
+	font-size: 0.72rem;
+	font-weight: 800;
+	letter-spacing: 0.08em;
+	z-index: 5;
+}
+
+.k-tag-before {
+	left: 1.5rem;
+	background: rgba(255, 77, 77, 0.15);
+	border: 1px solid #ff4d4d;
+	color: #ff4d4d;
+}
+
+.k-tag-after {
+	right: 1.5rem;
+	background: rgba(204, 255, 0, 0.15);
+	border: 1px solid var(--hero-accent, #ccff00);
+	color: var(--hero-accent, #ccff00);
+}
+
+.k-cross-icon {
+	font-size: 1rem;
+	line-height: 1;
+}
+
+/* Drag Handle */
+.k-ba-handle {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 50%;
+	width: 40px;
+	margin-left: -20px;
+	z-index: 10;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+}
+
+.k-ba-line {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	width: 2px;
+	background: var(--hero-accent, #ccff00);
+	box-shadow: 0 0 15px var(--hero-accent, #ccff00);
+}
+
+.k-ba-knob {
+	width: 48px;
+	height: 48px;
+	background: #0a0b10;
+	border: 2px solid var(--hero-accent, #ccff00);
+	color: var(--hero-accent, #ccff00);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 0 20px rgba(204, 255, 0, 0.4);
+	transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.k-ba-container:hover .k-ba-knob {
+	transform: scale(1.1);
+	background: var(--hero-accent, #ccff00);
+	color: #000;
+}
+
+@media (max-width: 991px) {
+	.k-before-after-section {
+		padding: 4rem 1.5rem;
+	}
+	.k-ba-h2 {
+		font-size: 2.5rem;
+	}
+	.k-ba-container {
+		height: 420px;
+	}
+}
+
+.k-ba-container {
+    position: relative;
+    width: 100%;
+    height: 680px; /* Adjust to your layout height */
+    overflow: hidden;
+}
+
+.k-ba-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.k-ba-layer img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Forces both images to completely fill the container bounds uniformly without distortion */
+    object-position: center;
+}
+
+.k-ba-before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 50%; /* Controlled dynamically by the drag handle */
+    overflow: hidden;
+    z-index: 2;
+    border-right: 2px solid var(--hero-accent, #ccff00);
+}
+
+/* Forces the clipped 'before' image to map 100% to the parent container's total width rather than squishing */
+.k-ba-before img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+}
+/* REFINED BEFORE / AFTER CONTAINER & HEIGHT REDUCTION */
+.k-ba-container {
+	position: relative;
+	width: 100%;
+	max-width: 1280px;
+	height: 480px; /* Reduced height from 680px to fit viewports cleanly */
+	margin: 0 auto;
+	overflow: hidden;
+	border: 1px solid #1c1c28;
+	background: #000;
+	user-select: none;
+	cursor: ew-resize;
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+}
+
+.k-ba-layer {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+}
+
+/* Force both images to uniformly fill the exact same container size without breaking layout */
+.k-ba-layer img {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center;
+	pointer-events: none;
+	max-width: none;
+}
+
+.k-ba-before {
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	width: 50%; /* Controlled dynamically by the drag handle */
+	overflow: hidden;
+	z-index: 2;
+	border-right: 2px solid var(--hero-accent, #ccff00);
+}
+
+/* Ensures the clipped 'before' layer aligns perfectly with the main container width */
+.k-ba-before img {
+	width: 100vw; /* Matches viewport or container width cleanly */
+	max-width: 1280px;
+}
+
+/* BEFORE / AFTER SPLIT SECTION */
+.k-ba-section {
+	width: 100%;
+	padding: 8rem 4rem;
+	background-color: #060608;
+	border-bottom: 2px solid #1c1c28;
+	position: relative;
+}
+
+.k-ba-container {
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+.k-ba-header {
+	text-align: center;
+	max-width: 700px;
+	margin: 0 auto 4rem auto;
+}
+
+.k-ba-h2 {
+	font-size: 3.8vw;
+	font-weight: 900;
+	text-transform: uppercase;
+	letter-spacing: -0.04em;
+	color: #fff;
+	line-height: 0.95;
+	margin: 1rem 0;
+}
+
+.k-ba-h2 span {
+	color: var(--hero-accent, #ccff00);
+}
+
+.k-ba-desc {
+	font-size: 1rem;
+	color: #888896;
+	line-height: 1.6;
+}
+
+/* Comparison Container Frame */
+.k-ba-frame {
+	position: relative;
+	width: 100%;
+	height: 580px;
+	background: #000;
+	border: 1px solid #1c1c28;
+	overflow: hidden;
+	user-select: none;
+	cursor: ew-resize;
+}
+
+.k-ba-layer {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+.k-ba-img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover; /* Forces image to fit perfectly inside frame always */
+	object-position: center;
+	display: block;
+	pointer-events: none;
+}
+
+/* Clipping mask logic for After layer */
+.k-ba-after {
+	z-index: 2;
+	width: 50%; /* Initial split position */
+	border-right: 2px solid var(--hero-accent, #ccff00);
+	transition: width 0.05s linear;
+}
+
+.k-ba-before {
+	z-index: 1;
+}
+
+/* Labels */
+.k-ba-badge {
+	position: absolute;
+	top: 1.5rem;
+	font-family: 'Courier New', Courier, monospace;
+	font-size: 0.72rem;
+	font-weight: 800;
+	padding: 0.4rem 0.85rem;
+	letter-spacing: 0.08em;
+	z-index: 4;
+}
+
+.k-badge-before {
+	left: 1.5rem;
+	background: rgba(255, 77, 77, 0.9);
+	color: #fff;
+}
+
+.k-badge-after {
+	right: 1.5rem;
+	background: var(--hero-accent, #ccff00);
+	color: #000;
+}
+
+/* Handle Divider */
+.k-ba-handle {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 50%;
+	z-index: 5;
+	transform: translateX(-50%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+}
+
+.k-ba-line {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	width: 2px;
+	background: var(--hero-accent, #ccff00);
+	box-shadow: 0 0 12px var(--hero-accent, #ccff00);
+}
+
+.k-ba-knob {
+	width: 44px;
+	height: 44px;
+	background: var(--hero-accent, #ccff00);
+	color: #000;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+	position: relative;
+	z-index: 6;
+}
+
+@media (max-width: 991px) {
+	.k-ba-section {
+		padding: 4rem 1.5rem;
+	}
+	.k-ba-h2 {
+		font-size: 2.5rem;
+	}
+	.k-ba-frame {
+		height: 380px;
+	}
+}
+
+/* Comparison Container Frame - Increased Height */
+.k-ba-frame {
+	position: relative;
+	width: 100%;
+	height: 720px; /* Increased height */
+	background: #000;
+	border: 1px solid #1c1c28;
+	overflow: hidden;
+	user-select: none;
+	cursor: ew-resize;
+}
+
+.k-ba-layer {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+.k-ba-img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center;
+	display: block;
+	pointer-events: none;
+}
+
+/* Smooth Clipping Mask Transition */
+.k-ba-after {
+	z-index: 2;
+	width: 50%;
+	border-right: 2px solid var(--hero-accent, #ccff00);
+	transition: width 0.15s cubic-bezier(0.25, 1, 0.5, 1); /* Smoother easing curve */
+}
+
+.k-ba-before {
+	z-index: 1;
+}
+
+/* Handle Divider */
+.k-ba-handle {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 50%;
+	z-index: 5;
+	transform: translateX(-50%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+	transition: left 0.15s cubic-bezier(0.25, 1, 0.5, 1); /* Synchronized smooth tracking */
+}
+
+.k-ba-line {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	width: 2px;
+	background: var(--hero-accent, #ccff00);
+	box-shadow: 0 0 15px var(--hero-accent, #ccff00);
+}
+
+.k-ba-knob {
+	width: 48px;
+	height: 48px;
+	background: var(--hero-accent, #ccff00);
+	color: #000;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
+	position: relative;
+	z-index: 6;
+}
+
+/* Responsive Height Overrides */
+@media (max-width: 991px) {
+	.k-ba-section {
+		padding: 4rem 1.5rem;
+	}
+	.k-ba-h2 {
+		font-size: 2.5rem;
+	}
+	.k-ba-frame {
+		height: 460px; /* Increased mobile height */
+	}
+}
+
+/* =========================================================
+   Kinetic Before/After Widget — Neo-Brutalist Dark Styles
+   ========================================================= */
+
+.kinetic-ba {
+	--kba-bg: #040406;
+	--kba-bg-alt: #060608;
+	--kba-surface: #0a0b10;
+	--kba-surface-alt: #0d0e14;
+	--kba-border: #1c1c28;
+	--kba-accent: var(--hero-accent, #ccff00);
+	--kba-accent-hover: #e6ff66;
+	--kba-alert: #ff4d4d;
+	--kba-text: #ffffff;
+	--kba-muted: #888896;
+
+	position: relative;
+	background: var(--kba-bg);
+	color: var(--kba-text);
+	padding: clamp(48px, 8vw, 120px) clamp(20px, 5vw, 64px);
+	overflow: hidden;
+	font-family: inherit;
+}
+
+.kinetic-ba * {
+	box-sizing: border-box;
+}
+
+/* ---------- Header ---------- */
+.kba-header {
+	max-width: 760px;
+	margin: 0 auto clamp(32px, 6vw, 64px);
+	text-align: center;
+}
+
+.kba-badge {
+	display: inline-block;
+	font-family: 'JetBrains Mono', 'Courier New', monospace;
+	font-size: 13px;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--kba-accent);
+	border: 1px solid var(--kba-border);
+	background: var(--kba-surface);
+	padding: 6px 14px;
+	margin-bottom: 20px;
+}
+
+.kba-title {
+	font-size: clamp(32px, 5.5vw, 64px);
+	line-height: 1.05;
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	text-transform: uppercase;
+	margin: 0 0 16px;
+	color: var(--kba-text);
+}
+
+.kba-title span {
+	color: var(--kba-accent);
+}
+
+.kba-description {
+	font-size: clamp(15px, 1.4vw, 18px);
+	line-height: 1.6;
+	color: var(--kba-muted);
+	margin: 0 auto;
+	max-width: 560px;
+}
+
+/* ---------- Stage / Frame ---------- */
+.kba-stage {
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+.kba-frame {
+	position: relative;
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	background: var(--kba-surface);
+	border: 1px solid var(--kba-border);
+	overflow: hidden;
+	cursor: ew-resize;
+	user-select: none;
+	touch-action: pan-y;
+	box-shadow: 0 0 0 1px #000, 8px 8px 0 0 var(--kba-border);
+}
+
+/* ---------- Panels (Before = base, After = clipped overlay) ---------- */
+.kba-panel {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	background: var(--kba-surface-alt);
+}
+
+.kba-panel--after {
+	clip-path: inset( 0 50% 0 0 ); /* JS updates this inline on drag/move */
+	will-change: clip-path;
+}
+
+.kba-panel__img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+	pointer-events: none;
+	filter: grayscale(0.15) contrast(1.05);
+}
+
+.kba-panel--before .kba-panel__img {
+	filter: grayscale(0.55) contrast(0.95) brightness(0.75);
+}
+
+.kba-panel__scrim {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient( 180deg, rgba(4, 4, 6, 0.1) 0%, rgba(4, 4, 6, 0.85) 100% );
+	pointer-events: none;
+}
+
+.kba-panel--before .kba-panel__scrim {
+	background: linear-gradient( 180deg, rgba(4, 4, 6, 0.2) 0%, rgba(20, 4, 4, 0.9) 100% );
+}
+
+.kba-panel__content {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	padding: clamp(20px, 3vw, 40px);
+	width: 100%;
+	max-width: 420px;
+	pointer-events: none;
+}
+
+.kba-tag {
+	display: inline-block;
+	font-family: 'JetBrains Mono', 'Courier New', monospace;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	padding: 4px 10px;
+	margin-bottom: 12px;
+	border: 1px solid currentColor;
+}
+
+.kba-tag--alert {
+	color: var(--kba-alert);
+	background: rgba(255, 77, 77, 0.08);
+}
+
+.kba-tag--accent {
+	color: var(--kba-accent);
+	background: rgba(204, 255, 0, 0.08);
+}
+
+.kba-panel__title {
+	font-size: clamp(22px, 2.6vw, 32px);
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: -0.01em;
+	margin: 0 0 6px;
+	color: var(--kba-text);
+}
+
+.kba-panel__tagline {
+	font-size: 14px;
+	color: var(--kba-muted);
+	margin: 0 0 16px;
+}
+
+/* ---------- Metrics ---------- */
+.kba-metrics {
+	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+}
+
+.kba-metric {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	background: rgba(10, 11, 16, 0.75);
+	border: 1px solid var(--kba-border);
+	padding: 8px 12px;
+	min-width: 96px;
+	backdrop-filter: blur(4px);
+}
+
+.kba-metric__label {
+	font-size: 10px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--kba-muted);
+}
+
+.kba-metric__value {
+	font-family: 'JetBrains Mono', 'Courier New', monospace;
+	font-size: 16px;
+	font-weight: 700;
+	color: var(--kba-text);
+}
+
+.kba-metrics--before .kba-metric__value {
+	color: var(--kba-alert);
+}
+
+.kba-metrics--after .kba-metric__value {
+	color: var(--kba-accent);
+}
+
+/* ---------- Drag Handle ---------- */
+.kba-handle {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 50%;
+	width: 0;
+	transform: translateX(-50%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+	z-index: 5;
+}
+
+.kba-handle__line {
+	width: 1px;
+	flex: 1;
+	background: var(--kba-accent);
+	box-shadow: 0 0 8px rgba(204, 255, 0, 0.6);
+}
+
+.kba-handle__grip {
+	pointer-events: all;
+	cursor: ew-resize;
+	width: 44px;
+	height: 44px;
+	min-width: 44px;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--kba-accent);
+	color: var(--kba-bg);
+	border: 1px solid var(--kba-bg);
+	margin: 6px 0;
+	transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.kba-frame:hover .kba-handle__grip,
+.kba-handle__grip:active {
+	background: var(--kba-accent-hover);
+}
+
+.kba-frame.is-dragging .kba-handle__grip {
+	transform: scale(1.1);
+}
+
+/* ---------- CTA ---------- */
+.kba-cta-wrap {
+	text-align: center;
+	margin-top: clamp(32px, 6vw, 56px);
+}
+
+.kba-cta {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	font-family: 'JetBrains Mono', 'Courier New', monospace;
+	font-size: 14px;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	text-decoration: none;
+	color: var(--kba-bg);
+	background: var(--kba-accent);
+	border: 1px solid var(--kba-accent);
+	padding: 16px 28px;
+	transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.kba-cta:hover {
+	background: var(--kba-accent-hover);
+	transform: translate(-2px, -2px);
+	box-shadow: 4px 4px 0 0 var(--kba-border);
+	color: var(--kba-bg);
+}
+
+.kba-cta__arrow {
+	transition: transform 0.15s ease;
+}
+
+.kba-cta:hover .kba-cta__arrow {
+	transform: translateX(4px);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 767px) {
+	.kba-frame {
+		aspect-ratio: 4 / 5;
+		box-shadow: 0 0 0 1px #000, 5px 5px 0 0 var(--kba-border);
+	}
+
+	.kba-panel__content {
+		max-width: 100%;
+		padding: 16px;
+	}
+
+	.kba-metrics {
+		gap: 6px;
+	}
+
+	.kba-metric {
+		min-width: 80px;
+		padding: 6px 10px;
+	}
+
+	.kba-handle__grip {
+		width: 40px;
+		height: 40px;
+	}
+}
+
+@media (max-width: 480px) {
+	.kba-panel__title {
+		font-size: 20px;
+	}
+
+	.kba-panel__tagline {
+		font-size: 12px;
+	}
+}

@@ -161,3 +161,5 @@ function kinetic_enqueue_hero_three_scripts() {
 	);
 }
 add_action( 'wp_enqueue_scripts', 'kinetic_enqueue_hero_three_scripts' );
+
+
