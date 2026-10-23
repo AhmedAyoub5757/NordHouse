@@ -1772,3 +1772,184 @@ document.addEventListener('DOMContentLoaded', () => {
 		);
 	}
 } )();
+
+document.addEventListener('DOMContentLoaded', () => {
+
+	const canvas = document.getElementById('nexusGlobeCanvas');
+
+	if (canvas) {
+		const ctx = canvas.getContext('2d');
+		let width, height;
+		let dots = [];
+		const dotCount = 450;
+		const globeRadius = 130;
+
+		let rotationX = 0;
+		let rotationY = 0;
+		let autoSpeedY = 0.006;
+		let isDragging = false;
+		let lastMouseX = 0;
+		let lastMouseY = 0;
+
+		// Major Global Tech Hub Nodes with Location Flags
+		const flagNodes = [
+			{ lat: 40.7128, lon: -74.0060, label: '🇺🇸 [US-EST]' },
+			{ lat: 51.5074, lon: -0.1278,  label: '🇬🇧 [UK-GMT]' },
+			{ lat: 24.8607, lon: 67.0011,  label: '🇵🇰 [PK-PKT]' },
+			{ lat: 1.3521,  lon: 103.8198, label: '🇸🇬 [SG-SGT]' }
+		];
+
+		function resizeCanvas() {
+			const rect = canvas.parentNode.getBoundingClientRect();
+			width = rect.width;
+			height = rect.height;
+			canvas.width = width * (window.devicePixelRatio || 1);
+			canvas.height = height * (window.devicePixelRatio || 1);
+			ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+		}
+
+		resizeCanvas();
+		window.addEventListener('resize', resizeCanvas);
+
+		function latLonToXYZ(lat, lon, radius) {
+			const phi = (90 - lat) * (Math.PI / 180);
+			const theta = (lon + 180) * (Math.PI / 180);
+			return {
+				x: -(radius * Math.sin(phi) * Math.cos(theta)),
+				y: radius * Math.cos(phi),
+				z: radius * Math.sin(phi) * Math.sin(theta)
+			};
+		}
+
+		function initGlobe() {
+			dots = [];
+			
+			// Generate standard Fibonacci sphere dots
+			for (let i = 0; i < dotCount; i++) {
+				const phi = Math.acos(-1 + (2 * i) / dotCount);
+				const theta = Math.sqrt(dotCount * Math.PI) * phi;
+
+				const x = globeRadius * Math.cos(theta) * Math.sin(phi);
+				const y = globeRadius * Math.sin(theta) * Math.sin(phi);
+				const z = globeRadius * Math.cos(phi);
+
+				dots.push({ x, y, z, isFlag: false });
+			}
+
+			// Add flagship location nodes
+			flagNodes.forEach(node => {
+				const pos = latLonToXYZ(node.lat, node.lon, globeRadius);
+				dots.push({ x: pos.x, y: pos.y, z: pos.z, isFlag: true, label: node.label });
+			});
+		}
+
+		initGlobe();
+
+		// Drag Control
+		canvas.addEventListener('mousedown', (e) => {
+			isDragging = true;
+			lastMouseX = e.clientX;
+			lastMouseY = e.clientY;
+		});
+
+		window.addEventListener('mouseup', () => isDragging = false);
+
+		window.addEventListener('mousemove', (e) => {
+			if (isDragging) {
+				const deltaX = e.clientX - lastMouseX;
+				const deltaY = e.clientY - lastMouseY;
+				rotationY += deltaX * 0.008;
+				rotationX += deltaY * 0.008;
+				lastMouseX = e.clientX;
+				lastMouseY = e.clientY;
+			}
+		});
+
+		// Render Loop
+		function renderGlobe() {
+			ctx.clearRect(0, 0, width, height);
+
+			if (!isDragging) {
+				rotationY += autoSpeedY;
+			}
+
+			const cosX = Math.cos(rotationX);
+			const sinX = Math.sin(rotationX);
+			const cosY = Math.cos(rotationY);
+			const sinY = Math.sin(rotationY);
+
+			const centerX = width / 2;
+			const centerY = height / 2;
+
+			// Project 3D to 2D
+			const projectedDots = dots.map(dot => {
+				let x1 = dot.x * cosY - dot.z * sinY;
+				let z1 = dot.z * cosY + dot.x * sinY;
+
+				let y1 = dot.y * cosX - z1 * sinX;
+				let z2 = z1 * cosX + dot.y * sinX;
+
+				const scale = 320 / (320 + z2);
+				const projX = x1 * scale + centerX;
+				const projY = y1 * scale + centerY;
+				const alpha = Math.max(0.1, (z2 + globeRadius) / (globeRadius * 2));
+
+				return { projX, projY, scale, alpha, z: z2, isFlag: dot.isFlag, label: dot.label };
+			});
+
+			projectedDots.sort((a, b) => a.z - b.z);
+
+			// 1. Draw Connected Energy Arcs Between Flag Nodes
+			const flagPoints = projectedDots.filter(d => d.isFlag && d.z > -40);
+			for (let i = 0; i < flagPoints.length; i++) {
+				for (let j = i + 1; j < flagPoints.length; j++) {
+					const p1 = flagPoints[i];
+					const p2 = flagPoints[j];
+
+					ctx.beginPath();
+					ctx.moveTo(p1.projX, p1.projY);
+					
+					// Curve energy arc outward
+					const midX = (p1.projX + p2.projX) / 2;
+					const midY = (p1.projY + p2.projY) / 2 - 30;
+
+					ctx.quadraticCurveTo(midX, midY, p2.projX, p2.projY);
+					ctx.strokeStyle = `rgba(204, 255, 0, ${Math.min(p1.alpha, p2.alpha) * 0.4})`;
+					ctx.lineWidth = 1;
+					ctx.stroke();
+				}
+			}
+
+			// 2. Render Nodes and Location Flags
+			projectedDots.forEach(dot => {
+				ctx.beginPath();
+
+				if (dot.isFlag) {
+					// Glowing Primary Flag Node
+					ctx.arc(dot.projX, dot.projY, 4 * dot.scale, 0, Math.PI * 2);
+					ctx.fillStyle = `rgba(204, 255, 0, ${dot.alpha})`;
+					ctx.shadowBlur = 10;
+					ctx.shadowColor = '#ccff00';
+					ctx.fill();
+
+					// Draw Country Flag Label if on front hemisphere
+					if (dot.z > -20) {
+						ctx.font = '10px "Courier New", monospace';
+						ctx.fillStyle = `rgba(255, 255, 255, ${dot.alpha})`;
+						ctx.fillText(dot.label, dot.projX + 8, dot.projY + 3);
+					}
+				} else {
+					// Standard Dot Matrix
+					ctx.arc(dot.projX, dot.projY, 1.2 * dot.scale, 0, Math.PI * 2);
+					ctx.fillStyle = `rgba(255, 255, 255, ${dot.alpha * 0.5})`;
+					ctx.shadowBlur = 0;
+					ctx.fill();
+				}
+			});
+
+			requestAnimationFrame(renderGlobe);
+		}
+
+		renderGlobe();
+	}
+});
