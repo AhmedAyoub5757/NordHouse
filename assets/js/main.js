@@ -1271,3 +1271,191 @@ window.addEventListener('load', () => {
 		ScrollTrigger.refresh();
 	}, 200);
 });
+
+// HEADLINE WORD ROTATOR ENGINE
+function initHeadlineRotator() {
+	const wrapper = document.querySelector('.k-rotator-wrapper');
+	const container = document.getElementById('k-three-canvas-container-dual');
+	
+	if (!wrapper) return;
+
+	const words = wrapper.querySelectorAll('.k-rotator-word');
+	if (words.length <= 1) return;
+
+	const interval = container ? parseInt(container.getAttribute('data-rotate-speed')) || 2600 : 2600;
+	let currentIndex = 0;
+
+	setInterval(() => {
+		const currentWord = words[currentIndex];
+		currentIndex = (currentIndex + 1) % words.length;
+		const nextWord = words[currentIndex];
+
+		currentWord.classList.remove('is-active');
+		currentWord.classList.add('is-exiting');
+
+		setTimeout(() => {
+			currentWord.classList.remove('is-exiting');
+		}, 600);
+
+		nextWord.classList.add('is-active');
+	}, interval);
+}
+
+// THREE.JS RHS BIASED ORB & PARTICLE ENGINE
+function initKineticHeroThreeDual() {
+	const container = document.getElementById('k-three-canvas-container-dual');
+	if (!container || typeof THREE === 'undefined') return;
+
+	const showOrb = container.getAttribute('data-show-orb') !== '0';
+	if (!showOrb) return;
+
+	container.innerHTML = '';
+
+	const particleCount = parseInt(container.getAttribute('data-particle-count')) || 2800;
+	const sensitivity = parseFloat(container.getAttribute('data-sensitivity')) || 0.05;
+
+	const width = container.clientWidth || window.innerWidth;
+	const height = container.clientHeight || window.innerHeight;
+
+	// 1. SCENE SETUP
+	const scene = new THREE.Scene();
+	const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+	camera.position.z = 85;
+
+	const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+	renderer.setSize(width, height);
+	renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+	container.appendChild(renderer.domElement);
+
+	// 2. ORB GEOMETRY WITH RHS BIAS ANCHOR
+	const geometry = new THREE.BufferGeometry();
+	const positions = new Float32Array(particleCount * 3);
+	const initialPositions = new Float32Array(particleCount * 3);
+	const scatterDirections = new Float32Array(particleCount * 3);
+
+	const radius = 30;
+
+	for (let i = 0; i < particleCount; i++) {
+		const phi = Math.acos(-1 + (2 * i) / particleCount);
+		const theta = Math.sqrt(particleCount * Math.PI) * phi;
+
+		const x = radius * Math.cos(theta) * Math.sin(phi);
+		const y = radius * Math.sin(theta) * Math.sin(phi);
+		const z = radius * Math.cos(phi);
+
+		positions[i * 3] = x;
+		positions[i * 3 + 1] = y;
+		positions[i * 3 + 2] = z;
+
+		initialPositions[i * 3] = x;
+		initialPositions[i * 3 + 1] = y;
+		initialPositions[i * 3 + 2] = z;
+
+		// Dispersal vectors allow full-screen particle spread
+		scatterDirections[i * 3] = (Math.random() - 0.5) * 220;
+		scatterDirections[i * 3 + 1] = (Math.random() - 0.5) * 220;
+		scatterDirections[i * 3 + 2] = (Math.random() - 0.5) * 220;
+	}
+
+	geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+	// Radial Glow Point Texture
+	const canvas = document.createElement('canvas');
+	canvas.width = 32;
+	canvas.height = 32;
+	const ctx = canvas.getContext('2d');
+	const grad = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+	grad.addColorStop(0, 'rgba(204,255,0,1)');
+	grad.addColorStop(0.35, 'rgba(204,255,0,0.35)');
+	grad.addColorStop(1, 'rgba(0,0,0,0)');
+	ctx.fillStyle = grad;
+	ctx.fillRect(0, 0, 32, 32);
+
+	const texture = new THREE.CanvasTexture(canvas);
+
+	const material = new THREE.PointsMaterial({
+		color: 0xccff00,
+		size: 2.4,
+		map: texture,
+		transparent: true,
+		opacity: 0.9,
+		blending: THREE.AdditiveBlending,
+		depthWrite: false
+	});
+
+	const particleSystem = new THREE.Points(geometry, material);
+	
+	// Shift initial orb origin toward RHS (+25 X-Offset)
+	const baseOffsetX = window.innerWidth > 991 ? 25 : 0;
+	particleSystem.position.x = baseOffsetX;
+	scene.add(particleSystem);
+
+	// 3. MOUSE TRACKING WITH CONTROLLED SENSITIVITY
+	const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+
+	window.addEventListener('mousemove', (e) => {
+		mouse.targetX = (e.clientX / window.innerWidth) * 2 - 1;
+		mouse.targetY = -(e.clientY / window.innerHeight) * 2 + 1;
+	});
+
+	// 4. GSAP SCROLL DISPERSAL
+	let dispersalProgress = { value: 0 };
+
+	if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+		gsap.registerPlugin(ScrollTrigger);
+
+		gsap.to(dispersalProgress, {
+			value: 1,
+			ease: 'none',
+			scrollTrigger: {
+				trigger: '#hero',
+				start: 'top top',
+				end: 'bottom top',
+				scrub: 1,
+				onUpdate: (self) => {
+					material.opacity = 0.9 * (1 - self.progress);
+				}
+			}
+		});
+	}
+
+	// 5. ANIMATION LOOP
+	function animate() {
+		requestAnimationFrame(animate);
+
+		mouse.x += (mouse.targetX - mouse.x) * sensitivity;
+		mouse.y += (mouse.targetY - mouse.y) * sensitivity;
+
+		// Track mouse movement relative to the RHS base offset
+		particleSystem.position.x = baseOffsetX + (mouse.x * 20);
+		particleSystem.position.y = mouse.y * 15;
+		particleSystem.rotation.y += 0.003;
+
+		const pos = particleSystem.geometry.attributes.position.array;
+		const factor = dispersalProgress.value;
+
+		for (let i = 0; i < particleCount; i++) {
+			pos[i * 3] = initialPositions[i * 3] + scatterDirections[i * 3] * factor;
+			pos[i * 3 + 1] = initialPositions[i * 3 + 1] + scatterDirections[i * 3 + 1] * factor;
+			pos[i * 3 + 2] = initialPositions[i * 3 + 2] + scatterDirections[i * 3 + 2] * factor;
+		}
+
+		particleSystem.geometry.attributes.position.needsUpdate = true;
+		renderer.render(scene, camera);
+	}
+
+	animate();
+
+	window.addEventListener('resize', () => {
+		const newW = container.clientWidth || window.innerWidth;
+		const newH = container.clientHeight || window.innerHeight;
+		camera.aspect = newW / newH;
+		camera.updateProjectionMatrix();
+		renderer.setSize(newW, newH);
+	});
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+	initHeadlineRotator();
+	initKineticHeroThreeDual();
+});

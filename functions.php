@@ -117,3 +117,47 @@ function kinetic_handle_inquiry_submission( $request ) {
         ), 500 );
     }
 }
+
+/**
+ * Enqueue Three.js and Theme Assets
+ */
+/**
+ * Enqueue Kinetic Theme Scripts and Libraries
+ */
+function kinetic_enqueue_hero_three_scripts() {
+	// Three.js CDN
+	wp_enqueue_script(
+		'three-js',
+		'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
+		array(),
+		'r128',
+		true
+	);
+
+	// GSAP & ScrollTrigger
+	wp_enqueue_script(
+		'gsap',
+		'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js',
+		array(),
+		'3.12.2',
+		true
+	);
+
+	wp_enqueue_script(
+		'gsap-scroll-trigger',
+		'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js',
+		array( 'gsap' ),
+		'3.12.2',
+		true
+	);
+
+	// Main Theme JS
+	wp_enqueue_script(
+		'kinetic-main-js',
+		get_template_directory_uri() . '/assets/js/main.js',
+		array( 'jquery', 'three-js', 'gsap', 'gsap-scroll-trigger' ),
+		'1.0.0',
+		true
+	);
+}
+add_action( 'wp_enqueue_scripts', 'kinetic_enqueue_hero_three_scripts' );
