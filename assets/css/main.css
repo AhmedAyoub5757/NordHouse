@@ -4487,3 +4487,342 @@ body {
 		min-height: 300px;
 	}
 }
+
+/* ADD-ON PRICING SECTION STYLING */
+.k-addon-pricing-section {
+	width: 100%;
+	padding: 8rem 4rem;
+	background-color: #060608;
+	border-bottom: 2px solid #1c1c28;
+	position: relative;
+}
+
+.k-addon-container {
+	max-width: 1250px;
+	margin: 0 auto;
+}
+
+.k-addon-header {
+	text-align: center;
+	max-width: 700px;
+	margin: 0 auto 5rem auto;
+}
+
+.k-addon-h2 {
+	font-size: 3.5vw;
+	font-weight: 900;
+	text-transform: uppercase;
+	letter-spacing: -0.04em;
+	color: #fff;
+	line-height: 0.95;
+	margin: 1rem 0;
+}
+
+.k-addon-h2 span {
+	color: var(--hero-accent, #ccff00);
+}
+
+.k-addon-desc {
+	font-size: 1rem;
+	color: #888896;
+	line-height: 1.6;
+}
+
+/* Split Layout Grid (Equal Height) */
+.k-addon-grid {
+	display: grid;
+	grid-template-columns: 1.3fr 1fr;
+	gap: 3rem;
+	align-items: stretch;
+}
+
+.k-addon-lhs, .k-addon-rhs {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+.k-lhs-title-wrap {
+	margin-bottom: 2rem;
+}
+
+.k-lhs-title-wrap h3 {
+	font-size: 1.5rem;
+	font-weight: 800;
+	color: #fff;
+	text-transform: uppercase;
+	margin: 0 0 0.5rem 0;
+}
+
+.k-lhs-title-wrap p {
+	font-size: 0.9rem;
+	color: #777785;
+	margin: 0;
+}
+
+/* Modules List */
+.k-modules-list {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	flex-grow: 1;
+}
+
+.k-module-card {
+	background: #090a0f;
+	border: 1px solid #1c1c28; /* Base subtle border */
+	padding: 1.5rem 1.75rem;
+	display: flex;
+	align-items: center;
+	gap: 1.25rem;
+	transition: background-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+/* NO BORDER POP-IN ON SELECTION (Clean Fill & Glow Icon) */
+.k-module-card.is-selected {
+	background: rgba(204, 255, 0, 0.04);
+}
+
+.k-module-icon-box {
+	width: 44px;
+	height: 44px;
+	background: #11121a;
+	border: 1px solid #1c1c28;
+	color: #777;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	transition: color 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.k-module-card.is-selected .k-module-icon-box {
+	color: var(--hero-accent, #ccff00);
+	border-color: var(--hero-accent, #ccff00);
+	background: rgba(204, 255, 0, 0.1);
+}
+
+.k-module-info {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+	flex-grow: 1;
+}
+
+.k-mod-name {
+	font-size: 1.05rem;
+	font-weight: 800;
+	color: #fff;
+	letter-spacing: -0.01em;
+}
+
+.k-mod-desc {
+	font-size: 0.82rem;
+	color: #888896;
+	line-height: 1.4;
+}
+
+.k-module-right {
+	display: flex;
+	align-items: center;
+	gap: 1.5rem;
+	flex-shrink: 0;
+}
+
+.k-mod-price {
+	font-family: 'Courier New', Courier, monospace;
+	font-size: 0.85rem;
+	font-weight: 700;
+	color: var(--hero-accent, #ccff00);
+}
+
+/* iOS Toggle Switch */
+.k-ios-toggle {
+	position: relative;
+	display: inline-block;
+	width: 48px;
+	height: 26px;
+	cursor: pointer;
+}
+
+.k-ios-toggle input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.k-slider {
+	position: absolute;
+	cursor: pointer;
+	top: 0; left: 0; right: 0; bottom: 0;
+	background-color: #161720;
+	border: 1px solid #2a2b38;
+	transition: 0.35s cubic-bezier(0.77, 0, 0.175, 1);
+	border-radius: 13px;
+}
+
+.k-slider:before {
+	position: absolute;
+	content: "";
+	height: 18px;
+	width: 18px;
+	left: 3px;
+	bottom: 3px;
+	background-color: #666;
+	transition: 0.35s cubic-bezier(0.77, 0, 0.175, 1);
+	border-radius: 50%;
+}
+
+.k-ios-toggle input:checked + .k-slider {
+	background-color: var(--hero-accent, #ccff00);
+	border-color: var(--hero-accent, #ccff00);
+}
+
+.k-ios-toggle input:checked + .k-slider:before {
+	transform: translateX(22px);
+	background-color: #000;
+}
+
+/* RHS: Summary Monolith Card */
+.k-summary-monolith {
+	background: #090a0f;
+	border: 1px solid #1c1c28;
+	padding: 3rem 2.5rem;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	position: sticky;
+	top: 8rem;
+	transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.k-summary-top h3 {
+	font-size: 1.15rem;
+	font-weight: 800;
+	color: #fff;
+	text-transform: uppercase;
+	margin: 0 0 0.25rem 0;
+	letter-spacing: -0.01em;
+}
+
+.k-addon-count-txt {
+	font-family: 'Courier New', Courier, monospace;
+	font-size: 0.78rem;
+	color: var(--hero-accent, #ccff00);
+	margin: 0;
+}
+
+.k-summary-price-box {
+	display: flex;
+	align-items: flex-start;
+	margin: 2rem 0 1rem 0;
+}
+
+.k-curr {
+	font-size: 2rem;
+	font-weight: 900;
+	color: var(--hero-accent, #ccff00);
+	margin-top: 0.25rem;
+}
+
+.k-total-price {
+	font-size: 4.5rem;
+	font-weight: 900;
+	color: #fff;
+	letter-spacing: -0.04em;
+	line-height: 1;
+	display: inline-block;
+}
+
+.k-price-breakdown {
+	font-family: 'Courier New', Courier, monospace;
+	font-size: 0.78rem;
+	color: #888896;
+	border-bottom: 1px solid #1c1c28;
+	padding-bottom: 1.5rem;
+	margin-bottom: 2rem;
+}
+
+.k-summary-btn {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 1.15rem 1.75rem;
+	background: var(--hero-accent, #ccff00);
+	color: #000;
+	font-weight: 900;
+	font-size: 0.85rem;
+	text-decoration: none;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.k-summary-btn:hover {
+	background: #fff;
+	transform: translateY(-2px);
+}
+
+.k-summary-btn svg {
+	transition: transform 0.3s ease;
+}
+
+.k-summary-btn:hover svg {
+	transform: translateX(4px);
+}
+
+/* Always Included */
+.k-always-included {
+	margin-top: 2.5rem;
+	border-top: 1px dashed #1c1c28;
+	padding-top: 2rem;
+}
+
+.k-inc-title {
+	font-family: 'Courier New', Courier, monospace;
+	font-size: 0.72rem;
+	color: #777785;
+	letter-spacing: 0.08em;
+	display: block;
+	margin-bottom: 1rem;
+	text-transform: uppercase;
+}
+
+.k-inc-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.k-inc-list li {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	font-size: 0.88rem;
+	color: #ccc;
+}
+
+.k-inc-list svg {
+	color: var(--hero-accent, #ccff00);
+	flex-shrink: 0;
+}
+
+@media (max-width: 991px) {
+	.k-addon-pricing-section {
+		padding: 4rem 1.5rem;
+	}
+	.k-addon-h2 {
+		font-size: 2.5rem;
+	}
+	.k-addon-grid {
+		grid-template-columns: 1fr;
+	}
+	.k-summary-monolith {
+		position: relative;
+		top: 0;
+	}
+}

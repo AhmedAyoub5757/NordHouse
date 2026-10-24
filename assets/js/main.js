@@ -1953,3 +1953,88 @@ document.addEventListener('DOMContentLoaded', () => {
 		renderGlobe();
 	}
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+
+	const pricingGrid = document.querySelector('.k-addon-grid');
+
+	if (pricingGrid) {
+		const basePrice = parseInt(pricingGrid.getAttribute('data-base-price')) || 950;
+		const moduleCards = document.querySelectorAll('.k-module-card');
+		const totalPriceEl = document.getElementById('kTotalPrice');
+		const addonCountEl = document.getElementById('kAddonCount');
+		const addonTotalDisplayEl = document.getElementById('kAddonTotalDisplay');
+		const summaryMonolith = document.querySelector('.k-summary-monolith');
+
+		let currentTotal = basePrice;
+
+		function calculateTotals(isInitial = false) {
+			let activeAddonsCount = 0;
+			let activeAddonsPrice = 0;
+
+			moduleCards.forEach(card => {
+				const checkbox = card.querySelector('.k-addon-checkbox');
+				const price = parseInt(card.getAttribute('data-price')) || 0;
+
+				if (checkbox && checkbox.checked) {
+					activeAddonsCount++;
+					activeAddonsPrice += price;
+					card.classList.add('is-selected');
+				} else {
+					card.classList.remove('is-selected');
+				}
+			});
+
+			const newGrandTotal = basePrice + activeAddonsPrice;
+
+			if (!isInitial && typeof gsap !== 'undefined') {
+				// Smooth counter animation
+				gsap.to({ val: currentTotal }, {
+					val: newGrandTotal,
+					duration: 0.5,
+					ease: 'power3.out',
+					onUpdate: function() {
+						totalPriceEl.textContent = Math.round(this.targets()[0].val);
+					}
+				});
+
+				gsap.to({ val: parseInt(addonTotalDisplayEl.textContent) || 0 }, {
+					val: activeAddonsPrice,
+					duration: 0.5,
+					ease: 'power3.out',
+					onUpdate: function() {
+						addonTotalDisplayEl.textContent = Math.round(this.targets()[0].val);
+					}
+				});
+
+				// Subtle glow pulse on summary card
+				if (summaryMonolith) {
+					gsap.fromTo(summaryMonolith, 
+						{ borderColor: '#ccff00', boxShadow: '0 0 30px rgba(204,255,0,0.25)' },
+						{ borderColor: '#1c1c28', boxShadow: '0 0 0px rgba(0,0,0,0)', duration: 0.8, ease: 'power2.out' }
+					);
+				}
+
+			} else {
+				totalPriceEl.textContent = newGrandTotal;
+				addonTotalDisplayEl.textContent = activeAddonsPrice;
+			}
+
+			currentTotal = newGrandTotal;
+			addonCountEl.textContent = activeAddonsCount;
+		}
+
+		// Listen for toggle switches
+		moduleCards.forEach(card => {
+			const checkbox = card.querySelector('.k-addon-checkbox');
+			if (checkbox) {
+				checkbox.addEventListener('change', () => {
+					calculateTotals(false);
+				});
+			}
+		});
+
+		// Initial calculation
+		calculateTotals(true);
+	}
+});
